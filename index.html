@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#121212">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="A clean, keyboard-friendly calculator.">
+  <title>My Drive - Google Drive</title>
+  <link id="tabFavicon" rel="icon" type="image/x-icon" href="https://drive.google.com/favicon.ico">
+  <style>
+    :root {
+      --bg: #121212; --ink: #f7f8fc; --muted: #9399ae;
+      --line: rgba(255,255,255,.095); --indigo: #837bff; --cyan: #62def1;
+      --glass: rgba(255,255,255,.045); --glass-strong: rgba(255,255,255,.075);
+      --shadow: 0 28px 75px rgba(0,0,0,.42); --radius: 20px;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--ink); overflow-x: hidden; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .35; }
+    button:focus-visible, input:focus-visible { outline: 2px solid #9b9aff; outline-offset: 3px; }
+    [hidden] { display: none !important; }
+    .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+    .small-icon { width: 16px; height: 16px; }
+    .sr-only { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; white-space: nowrap; }
+
+    /* CALCULATOR */
+    .calculator-view { min-height: 100svh; display: grid; place-items: center; padding: 34px 18px; background: radial-gradient(ellipse at 50% 0%, #202026 0%, #121212 52%, #0d0d0e 100%); transition: opacity .32s, transform .32s; }
+    .calculator-view.leaving { opacity: 0; transform: translateY(-16px) scale(.985); }
+    .calculator-shell { width: min(100%, 392px); }
+    .calc-eyebrow { color: #777780; font-size: 10px; letter-spacing: .24em; text-align: center; font-weight: 750; margin-bottom: 18px; }
+    .calculator { padding: 24px 21px 22px; border-radius: 28px; background: linear-gradient(155deg,#222225,#1b1b1e 70%); box-shadow: 0 26px 70px #0009, inset 0 1px 1px #ffffff0b; border: 1px solid rgba(255,255,255,.07); }
+    .calc-top { display: flex; justify-content: space-between; align-items: center; padding: 1px 8px; color: #85858e; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+    .calc-top .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #8d8d94; opacity: .75; }
+    .calc-screen { min-height: 154px; padding: 35px 7px 23px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; overflow: hidden; }
+    .calc-previous { font-size: 16px; color: #888891; height: 24px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .calc-current { color: #fff; width: 100%; text-align: right; font-size: clamp(38px, 10vw, 61px); line-height: 1.2; letter-spacing: -.055em; font-weight: 500; font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 11px; }
+    .calc-key { appearance: none; border: none; aspect-ratio: 1; min-width: 0; border-radius: 999px; background: #333336; color: #fff; font-size: 27px; font-weight: 470; display: grid; place-items: center; transition: transform .11s ease, filter .16s, box-shadow .16s; -webkit-tap-highlight-color: transparent; user-select: none; }
+    .calc-key:hover { filter: brightness(1.18); }
+    .calc-key:active, .calc-key.pressed { transform: scale(.95); filter: brightness(1.28); }
+    .calc-key.utility { background: #a5a5a5; color: #171719; font-size: 21px; font-weight: 600; }
+    .calc-key.operator { background: #ff9f0a; color: white; font-size: 31px; }
+    .calc-key.operator.selected { box-shadow: 0 0 0 3px #ffffff25 inset; background: #fff; color: #ff9f0a; }
+    .calc-key.zero { grid-column: span 2; aspect-ratio: auto; border-radius: 100px; justify-content: start; padding-left: 31px; }
+    .calc-caption { text-align: center; color: #71717d; font-size: 12px; line-height: 1.5; margin: 17px 0 0; }
+
+    /* DASHBOARD */
+    .dashboard-view { min-height: 100svh; position: relative; isolation: isolate; background: #0f1117; animation: dashboard-in .45s cubic-bezier(.2,.85,.25,1) both; }
+    .dashboard-view::before { content:""; pointer-events:none; position: fixed; inset:0; z-index:-1; background: radial-gradient(ellipse 45% 40% at 8% 0%,#5049b019,transparent),radial-gradient(ellipse 36% 36% at 95% 35%,#2bcce70b,transparent); }
+    @keyframes dashboard-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    .dash-container { width: min(1220px, calc(100% - 56px)); margin-inline: auto; }
+    .topbar { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid rgba(255,255,255,.07); background: rgba(13,15,22,.83); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+    .topbar-inner { min-height: 84px; display: flex; align-items: center; gap: clamp(18px,3vw,40px); }
+    .brand { display:flex; align-items:center; gap:12px; white-space: nowrap; }
+    .brand-mark { width: 37px; height: 37px; border-radius: 12px; background: linear-gradient(145deg,#a499ff,#6056d7 65%,#3b80d8); display: grid; place-items:center; box-shadow: 0 5px 26px #645cf044; }
+    .brand-mark .icon { width: 21px; height: 21px; color:white; }
+    .brand-name { font-size: 17px; letter-spacing: -.04em; font-weight: 800; line-height: 1; }
+    .brand-sub { font-size: 9px; font-weight: 800; letter-spacing:.22em; color: #9093aa; margin-top: 5px; }
+    .topnav { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+    .nav-btn { display:flex; align-items:center; gap:9px; border:0; padding: 12px 15px; color:#989eb2; background: transparent; border-radius: 11px; font-size: 13px; font-weight: 650; transition: background .2s, color .2s; }
+    .nav-btn:hover { color: #fff; background:#ffffff09; }
+    .nav-btn.active { background: #8d80ff1b; color: #b5aeff; }
+    .nav-btn.active .icon { color: #9d94ff; }
+    .top-actions { display:flex; gap:9px; align-items:center; }
+    .action-btn { display: inline-flex; align-items: center; justify-content:center; gap:8px; border: 1px solid var(--line); white-space: nowrap; color:#d8def0; background:#ffffff08; border-radius: 11px; padding: 11px 14px; font-size: 12px; font-weight: 700; transition: .2s; }
+    .action-btn:hover { background:#ffffff13; border-color:#ffffff30; transform:translateY(-1px); }
+    .action-btn.panic { color: #ff898f; border-color:#ff606029; background: #ff40400c; }
+    .action-btn.panic:hover { background: #ff404021; }
+    .action-btn.primary { background: linear-gradient(105deg,#786ef1,#625ada); border-color:#ffffff20; color:white; box-shadow:0 7px 27px #655bef3d; }
+    .action-btn.primary:hover { filter:brightness(1.11); }
+    .action-btn .icon { width: 15px; height: 15px; }
+    main { padding-top: 34px; padding-bottom: 70px; }
+    .panel { animation: panel-in .32s ease both; }
+    @keyframes panel-in { from { opacity:0;transform:translateY(8px); } to { opacity:1;transform:none; } }
+    .eyebrow { color: #9992ff; font-size: 10px; letter-spacing: .18em; font-weight: 850; text-transform: uppercase; }
+    .section-heading { display:flex; align-items:end; justify-content:space-between; gap:18px; margin: 0 0 24px; }
+    .section-heading h2 { margin:8px 0 0; font-size:clamp(25px, 3.6vw, 32px); letter-spacing:-.045em; font-weight: 750; }
+    .section-heading p { color:#969caf; font-size: 13px; line-height:1.6; margin: 9px 0 0; }
+    .subtle-count { color:#a1a8bd; font-size:12px; border:1px solid var(--line); border-radius:11px; padding:9px 13px; background:#ffffff05; white-space:nowrap; }
+    .hero { position: relative; overflow:hidden; padding: 33px 36px; min-height: 228px; border: 1px solid #b3aff42e; border-radius:23px; background: radial-gradient(circle at 85% 60%,#756df43b,transparent 38%),linear-gradient(110deg,#27254a 0%,#181d36 49%,#14192b 100%); display:flex; align-items:center; justify-content:space-between; box-shadow: 0 22px 50px #06081138; }
+    .hero::after { content:""; position:absolute; right:-12%; top:-115%; width:61%; aspect-ratio:1; border-radius:50%; border:1px solid #c7c9ff19; box-shadow:0 0 0 45px #9799f108,0 0 0 90px #9799f107,0 0 0 135px #9799f104; pointer-events:none; }
+    .hero-content { position:relative; z-index:2; max-width: 540px; }
+    .hero-badge { display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid #aea9ff35; color:#c9c5ff; background:#ffffff0b; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:.09em; }
+    .hero-badge .sparkle { color:#86e4ed; }
+    .hero h1 { font-size:clamp(28px,4vw,43px); margin:16px 0 9px; letter-spacing:-.055em; line-height:1.09; font-weight:800; }
+    .hero h1 span { background:linear-gradient(100deg,#b9acff,#92d9ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .hero p { color:#aeb5d2; font-size:13px; line-height:1.65; max-width:460px; margin:0; }
+    .hero-stat { position: relative; flex:0 0 auto; width:132px; height:132px; display:grid; place-items:center; border-radius:25px; border:1px solid #ffffff25; background:#ffffff0b; box-shadow: inset 0 1px #ffffff18,0 12px 38px #02031438; transform: rotate(8deg); margin:0 65px 0 20px; }
+    .hero-stat .icon { width:76px; height:76px; color:#c0b8ff; stroke-width:1.1; }
+    .toolbar { margin:31px 0 20px; display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap; }
+    .searchbox { flex:1 1 285px; max-width:420px; position:relative; }
+    .searchbox .icon { position:absolute; top:50%; transform: translateY(-50%); left:15px; color:#777f98; width:17px;height:17px; }
+    .searchbox input { width:100%; background:#171a24; border:1px solid #ffffff14; border-radius:12px; outline:none; color:white; font-size:13px; padding:13px 14px 13px 43px; transition:border-color .2s,box-shadow .2s; }
+    .searchbox input::placeholder { color:#72798e; }
+    .searchbox input:focus { border-color:#8c82f888;box-shadow:0 0 0 3px #877df217; }
+    .filters { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+    .filter-pill { border-radius:999px; border:1px solid #ffffff12; background:#ffffff06; padding:10px 15px; font-size:12px; color:#a5aabd; font-weight:700; transition:.18s; }
+    .filter-pill:hover { border-color:#ffffff30; color:white; }
+    .filter-pill.selected { background:#8a81fa25; color:#c1bdff; border-color:#9e91fc64; }
+    .games-grid { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:17px; }
+    .game-card { min-width:0; overflow:hidden; border-radius:17px; border:1px solid #ffffff12; background:linear-gradient(180deg,#1b1e29,#171a24); transition: transform .22s, border-color .22s, box-shadow .22s; }
+    .game-card:hover { transform:translateY(-5px); border-color:#aca7ff50; box-shadow:0 15px 35px #0004; }
+    .game-art { height:155px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; background:var(--art); }
+    .game-art::before { content:""; position:absolute; width:155px; height:155px; border:1px solid #ffffff27; border-radius:38px; transform:rotate(35deg); box-shadow:0 0 0 20px #ffffff09,0 0 0 42px #ffffff06; right:-27px; top:-80px; }
+    .game-art::after { content:""; position:absolute; width:120px; height:120px; border-radius:50%; background:#fff; opacity:.06; filter:blur(22px); bottom:-76px; left:-25px; }
+    .game-symbol { font-weight:900; font-size:70px; line-height:1; color:#fff; text-shadow:0 8px 22px #0005; transform: rotate(-6deg); z-index:2; user-select:none; }
+    .game-art .art-sub { position:absolute; right:15px; bottom:13px; color:#ffffffca; font-size:9px; letter-spacing:.16em; font-weight:800; }
+    .game-info { padding:18px; }
+    .game-title-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .game-title { font-weight:780; letter-spacing:-.025em; font-size:17px; margin:0; }
+    .game-category { border:1px solid #ffffff19; color:#959cb3; background:#ffffff06; padding:5px 8px; border-radius:6px; font-size:10px; font-weight:750; }
+    .game-description { margin:9px 0 16px; color:#9098ae; font-size:12px; line-height:1.5; min-height:36px; }
+    .play-btn { width:100%; border-radius:10px; border:1px solid #9a94ff46; color:#cbc8ff; background:#7d77ee17; font-size:12px; font-weight:760; display:flex; align-items:center; justify-content:center; gap:9px; padding:11px; transition:.2s; }
+    .play-btn:hover { background:#847bf431; color:white; }
+    .play-btn .icon { width:14px;height:14px; }
+    .empty-results { text-align:center; padding:65px 15px; color:#9198ad; border:1px dashed #ffffff21; border-radius:18px; }
+    .empty-results strong { display:block; color:#e5e8f4; font-size:18px; margin-bottom:9px; }
+    .footer { margin-top:34px; color:#6b738b; font-size:11px; display:flex; align-items:center; justify-content:space-between; gap:18px; border-top:1px solid #ffffff0b; padding-top:22px; }
+
+    /* BROWSER */
+    .browser-shell { overflow:hidden; border-radius:19px; border:1px solid #ffffff19; background:#151824; box-shadow:var(--shadow); }
+    .browser-top { display:flex; align-items:center; gap:12px; padding:13px 17px; background:#202330; border-bottom:1px solid #ffffff10; }
+    .traffic-lights { display:flex; gap:7px; align-items:center; padding-right:7px; }
+    .traffic-lights i { width:10px;height:10px;border-radius:50%; display:block; background:#ff6964; }
+    .traffic-lights i:nth-child(2) { background:#f6c654; }.traffic-lights i:nth-child(3) { background:#43c97b; }
+    .browser-label { flex:1; text-align:center; padding-right:40px; color:#959cb4; font-size:11px; font-weight:650; }
+    .browser-controls { padding:12px 15px; display:flex; align-items:center; gap:8px; border-bottom:1px solid #ffffff12; background:#181b27; }
+    .square-btn { width:37px;height:37px; display:grid;place-items:center; border:1px solid transparent; border-radius:9px; color:#929bb6; background:transparent; }
+    .square-btn:hover:not(:disabled) { color:white;background:#ffffff0c; }
+    .url-wrap { display:flex; align-items:center; flex:1; min-width:0; gap:10px; background:#10131d; border:1px solid #ffffff13; border-radius:10px; padding:0 12px; }
+    .url-wrap:focus-within { border-color:#867aff9a; }
+    .url-wrap .icon { width:15px;height:15px;color:#8c95ac; }
+    .url-wrap input { min-width:0; width:100%; background:transparent; color:#d4d9e9; border:0; outline:0; padding:10px 0; font-size:12px; }
+    .go-btn { background:#6b64e9; color:white; border:0; border-radius:9px; padding:10px 14px; font-size:12px; font-weight:750; }
+    .go-btn:hover { background:#7d76ff; }
+    .bookmarks { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 17px; background:#141722; border-bottom:1px solid #ffffff0d; }
+    .bookmarks-label { font-size:10px; color:#7f88a1; font-weight:700; margin-right:4px; }
+    .bookmark { border-radius:999px; border:1px solid #ffffff12; background:#ffffff06; color:#adb4cd; font-size:11px; padding:7px 11px; }
+    .bookmark:hover { color:#fff; border-color:#ffffff35; }
+    .browser-frame-holder { position:relative; height:clamp(420px,65vh,740px); background:#fff; }
+    .browser-frame-holder iframe, .theater-frame { width:100%;height:100%;border:0;display:block; background:#fff; }
+    .frame-hint { position:absolute; bottom:17px; left:50%; transform:translateX(-50%); width:max-content; max-width:calc(100% - 32px); border:1px solid #c2bfff45; box-shadow:0 10px 38px #0008; border-radius:12px; background:#1d2036ee; backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; gap:12px; padding:9px 11px 9px 15px; color:#d4d7f1; font-size:11px; z-index:1; }
+    .frame-hint button { border:0; color:white; background:#655de3; padding:8px 11px; border-radius:7px; white-space:nowrap; font-size:11px; font-weight:750; }
+    .frame-hint button:hover { background:#7971f4; }
+    .browser-tip { color:#828aa0; font-size:12px; line-height:1.6; margin:16px 3px 0; }
+
+    /* SETTINGS */
+    .settings-grid { display:grid;grid-template-columns:1fr 1fr;gap:18px; }
+    .settings-card { padding:24px; border:1px solid #ffffff13; border-radius:18px; background:linear-gradient(135deg,#1b1d2a,#171a24); }
+    .settings-icon { display:grid; place-items:center; width:40px;height:40px;border-radius:12px;background:#8780ff20;color:#aaa2ff;margin-bottom:19px; }
+    .settings-card h3 { margin:0 0 9px; letter-spacing:-.03em; font-size:18px; }
+    .settings-card p { margin:0 0 22px; color:#969cb1; font-size:12px;line-height:1.65; }
+    .settings-detail { display:flex; justify-content:space-between; align-items:center; margin:0 0 19px; border:1px solid #ffffff15; background:#ffffff07; border-radius:12px; padding:14px; color:#a1a8bd; font-size:12px; }
+    .settings-detail strong { color:#e4e5f6; font-size:12px; }
+    .settings-card .action-btn { width:100%; }
+    .security-notes { margin:20px 0 0; padding:15px 17px; border:1px solid #b8a7ff20; border-radius:12px; color:#969eb5; background:#8b7bf207; font-size:12px; line-height:1.6; }
+    .security-notes strong { color:#c8c6e8; }
+
+    /* MODALS */
+    .modal-backdrop { position:fixed;inset:0;background:#05050bce;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:100;display:grid;place-items:center;padding:22px;animation:panel-in .2s ease both; }
+    .modal { width:min(100%,495px); background:linear-gradient(150deg,#222536,#161925); border:1px solid #ffffff21;box-shadow:0 25px 100px #000a; border-radius:22px; overflow:hidden; }
+    .modal-heading { display:flex;justify-content:space-between;gap:15px;align-items:center;padding:23px 24px 19px;border-bottom:1px solid #ffffff12; }
+    .modal-heading h3 { margin:5px 0 0;font-size:20px;letter-spacing:-.03em; }
+    .modal-heading .close-x { height:33px;width:33px;display:grid;place-items:center;border:1px solid #ffffff14;border-radius:9px;background:#ffffff0a;color:#bac0d2; }
+    .preset-list { padding:17px; display:grid;gap:9px; }
+    .preset-option { display:flex;align-items:center;gap:13px;padding:14px;border:1px solid #ffffff14;border-radius:13px;background:#ffffff06;text-align:left;color:#e8ebf8;transition:.2s; }
+    .preset-option:hover { background:#ffffff10; }
+    .preset-option.selected { border-color:#9486fd90;background:#8175f91d; }
+    .preset-symbol { display:grid;place-items:center;font-weight:850;font-size:15px;border-radius:10px;width:37px;height:37px;background:#ffffff13;color:#c9caff; }
+    .preset-name { display:block;font-size:13px;font-weight:750; }
+    .preset-sub { display:block;color:#8e96ac;font-size:11px;margin-top:3px; }
+    .preset-check { margin-left:auto;color:#ada1ff; }
+    .modal-footer { display:flex;justify-content:flex-end;gap:9px;padding:15px 18px 19px;border-top:1px solid #ffffff0d; }
+    .theater-backdrop { padding:0; }
+    .theater { width:100%;height:100%;display:flex;flex-direction:column;background:#101218; }
+    .theater-header { flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 20px;border-bottom:1px solid #ffffff1d;background:#181b27; }
+    .theater-name { font-size:14px;font-weight:800;letter-spacing:-.02em; }
+    .theater-name span { color:#929ab0;font-size:11px;font-weight:500;margin-left:8px; }
+    .theater-actions { display:flex;gap:8px;align-items:center; }
+    .theater-close { background:#ff525218;color:#ff959b;border:1px solid #ff67672c;border-radius:9px;font-weight:780;padding:10px 13px;font-size:12px; }
+    .theater-close:hover { background:#ff52522b; }
+    .theater-content { min-height:0; flex:1; position:relative;background:#fff; }
+    .theater-footer { padding:10px 19px;display:flex;justify-content:space-between;align-items:center;gap:12px; color:#999fb3;background:#141723;font-size:11px; }
+    .theater-footer button { border:0; background:transparent; color:#b8b1ff; font-size:11px;font-weight:750;padding:3px; }
+    .toast { position:fixed;bottom:22px;left:50%;transform:translate(-50%,18px); z-index:200; opacity:0; pointer-events:none; transition:opacity .18s,transform .18s; max-width:min(480px,90vw);border:1px solid #ffffff25; background:#25283a; color:#eef0ff; padding:13px 17px; border-radius:11px; font-size:12px; box-shadow:0 15px 40px #0008;text-align:center; }
+    .toast.visible { opacity:1;transform:translate(-50%,0); }
+
+    @media (max-width:1050px) {
+      .topbar-inner { flex-wrap:wrap; gap:14px 20px; padding:14px 0; }
+      .topnav { order:3; flex:0 0 100%; }
+      .top-actions { margin-left:auto; }
+      .games-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .hero-stat { margin-right:20px; }
+    }
+    @media (max-width:680px) {
+      .dash-container { width:min(100% - 30px,1220px); }
+      .topbar-inner { gap:12px; }
+      .brand-name { font-size:15px; }
+      .brand-sub { font-size:8px; }
+      .brand-mark { width:32px;height:32px; }
+      .top-actions .action-btn { font-size:0; padding:10px; }
+      .top-actions .action-btn .icon { width:17px;height:17px; }
+      .nav-btn { flex:1;justify-content:center;padding:11px 8px;font-size:12px; }
+      main { padding-top:20px; }
+      .hero { padding:26px 22px; min-height:214px; }
+      .hero h1 { font-size:30px; }
+      .hero-stat { display:none; }
+      .games-grid { gap:12px; }
+      .game-art { height:119px; }
+      .game-symbol { font-size:53px; }
+      .game-info { padding:14px; }
+      .game-title { font-size:14px; }
+      .game-category { font-size:9px;padding:4px 6px; }
+      .game-description { font-size:11px; }
+      .toolbar { margin:24px 0 17px; }
+      .searchbox { max-width:none; }
+      .searchbox input, .url-wrap input { font-size:16px; }
+      .settings-grid { grid-template-columns:1fr; }
+      .browser-top { display:none; }
+      .browser-controls { gap:4px;padding:9px 8px; }
+      .square-btn { width:30px;height:33px; }
+      .browser-controls .go-btn { padding:10px; }
+      .bookmarks { padding:10px; }
+      .browser-frame-holder { height:58svh; }
+      .frame-hint { flex-wrap:wrap; }
+      .theater-header { padding:12px; }
+      .theater-name span { display:none; }
+      .theater-actions .action-btn { font-size:0;padding:9px; }
+      .theater-actions .action-btn .icon { width:17px;height:17px; }
+      .theater-footer { font-size:10px; }
+      .footer { align-items:flex-start;flex-direction:column; }
+    }
+    @media (max-width:390px) {
+      .games-grid { grid-template-columns:1fr; }
+      .game-art { height:155px; }
+      .calc-grid { gap:9px; }
+      .calculator { padding-inline:16px; }
+      .calc-key { font-size:25px; }
+    }
+
+    /* Touchscreen support: avoid delayed taps, provide pointer feedback and generous targets. */
+    button, .game-card { -webkit-tap-highlight-color: transparent; }
+    button, .filter-pill, .bookmark { touch-action: manipulation; }
+    button { -webkit-user-select: none; user-select: none; }
+    input { -webkit-user-select: text; user-select: text; }
+    button.touch-pressed:not(:disabled) { filter:brightness(1.12); }
+    .calc-key.touch-pressed, .calc-key:active { transform:scale(.95); }
+    .action-btn.touch-pressed, .play-btn.touch-pressed, .filter-pill.touch-pressed,
+    .nav-btn.touch-pressed, .bookmark.touch-pressed, .go-btn.touch-pressed { transform:scale(.97); }
+    .touch-mode .nav-btn, .touch-mode .filter-pill, .touch-mode .bookmark,
+    .touch-mode .action-btn, .touch-mode .play-btn, .touch-mode .go-btn,
+    .touch-mode .theater-close, .touch-mode .preset-option,
+    .touch-mode .frame-hint button { min-height: 48px; }
+    .touch-mode .square-btn, .touch-mode .close-x { width:44px; min-width:44px; height:44px; }
+    .touch-mode .calc-key { touch-action: manipulation; }
+    .touch-mode .searchbox input, .touch-mode .url-wrap input { min-height:48px; font-size:16px; }
+    .touch-mode .nav-btn { padding-inline: 13px; }
+    .touch-mode .settings-card { scroll-margin-top:120px; }
+    .touch-mode .game-card:active { border-color:#aaa2ff80; }
+    @media (hover:none) { .game-card:hover { transform:none; } .game-card:active { transform:scale(.99); } }
+    @media (max-width:680px) {
+      .calculator-view { padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+      .calc-key { min-height:58px; }
+      .calc-caption { font-size:11px; }
+      .settings-card { padding:20px; }
+      .nav-btn { min-height:44px; }
+      .top-actions .action-btn { min-width:44px; min-height:44px; }
+      .play-btn, .filter-pill, .action-btn, .bookmark, .go-btn { min-height:44px; }
+      .browser-controls .square-btn { min-width:37px; min-height:42px; }
+      .theater-close { min-height:44px; }
+    }
+    @media (max-height:700px) and (max-width:680px) {
+      .calculator-view { align-items:start; }
+      .calc-eyebrow { margin-bottom:10px; }
+      .calculator { padding-top:16px; padding-bottom:16px; }
+      .calc-screen { min-height:110px; padding-top:12px; padding-bottom:13px; }
+      .calc-caption { margin-top:10px; }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Reusable inline vector icons: no icon fonts, frameworks, or external JavaScript. -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <symbol id="i-game" viewBox="0 0 24 24"><path d="M6.5 8.5h11c2.3 0 3.8 1.4 4.3 3.9l1 4.8c.5 2.3-1.8 3.8-3.7 2.5l-3.2-2.3H8.1l-3.2 2.3c-1.9 1.3-4.2-.2-3.7-2.5l1-4.8c.5-2.5 2-3.9 4.3-3.9Z"/><path d="M7 11.5v5M4.5 14h5M16.8 12.2h.01M19.2 14.6h.01"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3.2 4.8 6.2 4.8 9s-1.6 5.8-4.8 9M12 3C8.8 6.2 7.2 9.2 7.2 12s1.6 5.8 4.8 9"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="m9.7 3.6.5-1h3.6l.5 1 .7 1.5 1.7.7 1.5-.5 2.5 2.5-.5 1.5.7 1.7 1.5.7v3.6l-1.5.7-.7 1.7.5 1.5-2.5 2.5-1.5-.5-1.7.7-.7 1.5h-3.6l-.7-1.5-1.7-.7-1.5.5-2.5-2.5.5-1.5-.7-1.7-1.5-.7v-3.6l1.5-.7.7-1.7-.5-1.5 2.5-2.5 1.5.5 1.7-.7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.6" cy="10.6" r="6.7"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m10 5 7 7-7 7"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 8v-5l-3 3A8.5 8.5 0 1 0 21 13"/><path d="M20 3h-5"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 5h6v6M19 5l-9 9M19 14v5H5V5h5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.1 3.1 8.5 8 11 4.9-2.5 8-5.9 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-max" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12 5 5 10-10"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2Z"/></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 2v10M6.1 5.7A9 9 0 1 0 18 5.7"/></symbol>
+  </svg>
+
+  <section id="calculatorView" class="calculator-view" aria-label="Calculator">
+    <div class="calculator-shell">
+      <div class="calc-eyebrow">STANDARD CALCULATOR</div>
+      <div class="calculator">
+        <div class="calc-top"><span>CALCULATOR</span><span class="live-dot" aria-hidden="true"></span></div>
+        <div class="calc-screen" aria-live="polite" aria-atomic="true">
+          <div class="calc-previous" id="calcPrevious">&nbsp;</div>
+          <div class="calc-current" id="calcCurrent">0</div>
+        </div>
+        <div class="calc-grid" id="calcGrid" aria-label="Calculator keypad">
+          <button type="button" class="calc-key utility" data-key="AC">AC</button>
+          <button type="button" class="calc-key utility" data-key="sign">+/−</button>
+          <button type="button" class="calc-key utility" data-key="percent">%</button>
+          <button type="button" class="calc-key operator" data-key="/">÷</button>
+          <button type="button" class="calc-key" data-key="7">7</button>
+          <button type="button" class="calc-key" data-key="8">8</button>
+          <button type="button" class="calc-key" data-key="9">9</button>
+          <button type="button" class="calc-key operator" data-key="*">×</button>
+          <button type="button" class="calc-key" data-key="4">4</button>
+          <button type="button" class="calc-key" data-key="5">5</button>
+          <button type="button" class="calc-key" data-key="6">6</button>
+          <button type="button" class="calc-key operator" data-key="-">−</button>
+          <button type="button" class="calc-key" data-key="1">1</button>
+          <button type="button" class="calc-key" data-key="2">2</button>
+          <button type="button" class="calc-key" data-key="3">3</button>
+          <button type="button" class="calc-key operator" data-key="+">+</button>
+          <button type="button" class="calc-key zero" data-key="0">0</button>
+          <button type="button" class="calc-key" data-key=".">.</button>
+          <button type="button" class="calc-key operator" data-key="=">=</button>
+        </div>
+      </div>
+      <div class="calc-caption">Keyboard supported · Enter to calculate · Backspace to edit</div>
+    </div>
+  </section>
+
+  <div id="dashboardView" class="dashboard-view" hidden>
+    <header class="topbar">
+      <div class="dash-container topbar-inner">
+        <div class="brand"><div class="brand-mark"><svg class="icon"><use href="#i-spark"/></svg></div><div><div class="brand-name">NEXUS<span style="color:#a79eff">.</span></div><div class="brand-sub">YOUR SPACE</div></div></div>
+        <nav class="topnav" aria-label="Dashboard navigation">
+          <button type="button" class="nav-btn active" data-page="games" aria-current="page"><svg class="icon"><use href="#i-game"/></svg> Games</button>
+          <button type="button" class="nav-btn" data-page="browser"><svg class="icon"><use href="#i-globe"/></svg> Browser</button>
+          <button type="button" class="nav-btn" data-page="settings"><svg class="icon"><use href="#i-settings"/></svg> Settings</button>
+        </nav>
+        <div class="top-actions">
+          <button data-panic type="button" class="action-btn panic" title="Panic (Esc)"><svg class="icon"><use href="#i-power"/></svg> Panic (Esc)</button>
+        </div>
+      </div>
+    </header>
+    <main class="dash-container">
+      <section id="panel-games" class="panel" aria-label="Games and apps">
+        <div class="hero">
+          <div class="hero-content"><div class="hero-badge"><span class="sparkle">✦</span> YOUR DIGITAL PLAYGROUND</div>
+            <h1>Good to see you.<br><span>What are we playing?</span></h1>
+            <p>Jump into a game, discover something new, or launch a web experience — all in one polished space.</p>
+          </div>
+          <div class="hero-stat" aria-hidden="true"><svg class="icon"><use href="#i-game"/></svg></div>
+        </div>
+        <div class="toolbar">
+          <label class="searchbox"><span class="sr-only">Search games and apps</span><svg class="icon"><use href="#i-search"/></svg><input id="gameSearch" type="search" placeholder="Search games & apps..." autocomplete="off" spellcheck="false"></label>
+          <div class="filters" role="group" aria-label="Filter game categories">
+            <button type="button" class="filter-pill selected" data-category="All" aria-pressed="true">All</button>
+            <button type="button" class="filter-pill" data-category="Action" aria-pressed="false">Action</button>
+            <button type="button" class="filter-pill" data-category="Arcade" aria-pressed="false">Arcade</button>
+            <button type="button" class="filter-pill" data-category="Apps" aria-pressed="false">Apps</button>
+          </div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">EXPLORE THE COLLECTION</div><h2>Games & Apps</h2></div><div id="gameCount" class="subtle-count">6 experiences</div></div>
+        <div id="gamesGrid" class="games-grid"></div>
+        <div id="emptyGames" class="empty-results" hidden><strong>Nothing found</strong>Try another search or a different category.</div>
+      </section>
+
+      <section id="panel-browser" class="panel" aria-label="Embedded browser" hidden>
+        <div class="section-heading"><div><div class="eyebrow">EXPLORE THE WEB</div><h2>Mini Browser</h2><p>Your own minimal browser workspace, powered by the sites you visit.</p></div><div class="subtle-count">Search with DuckDuckGo</div></div>
+        <div class="browser-shell">
+          <div class="browser-top"><div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div><div class="browser-label">NEXUS Browser</div></div>
+          <form class="browser-controls" id="browserForm" autocomplete="off">
+            <button id="browserBack" class="square-btn" type="button" title="Back through entered addresses" aria-label="Back" disabled><svg class="icon"><use href="#i-left"/></svg></button>
+            <button id="browserForward" class="square-btn" type="button" title="Forward through entered addresses" aria-label="Forward" disabled><svg class="icon"><use href="#i-right"/></svg></button>
+            <button id="browserRefresh" class="square-btn" type="button" title="Refresh" aria-label="Refresh"><svg class="icon"><use href="#i-refresh"/></svg></button>
+            <label class="url-wrap"><span class="sr-only">URL or search query</span><svg class="icon"><use href="#i-lock"/></svg><input id="browserUrl" type="text" value="https://duckduckgo.com" placeholder="Search or enter a URL" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+            <button type="submit" class="go-btn">Go</button>
+          </form>
+          <div class="bookmarks"><span class="bookmarks-label">QUICK LINKS</span><button type="button" class="bookmark" data-link="https://duckduckgo.com">DuckDuckGo</button><button type="button" class="bookmark" data-link="https://www.wikipedia.org">Wikipedia</button><button type="button" class="bookmark" data-link="https://www.youtube.com">YouTube</button><button type="button" class="bookmark" data-link="https://www.roblox.com">Roblox</button></div>
+          <div class="browser-frame-holder"><iframe id="browserFrame" title="Embedded web browser" src="https://duckduckgo.com" allow="fullscreen; autoplay; gamepad" referrerpolicy="no-referrer"></iframe>
+            <div class="frame-hint"><span>Site not showing? Some sites block embedded views.</span><button id="browserOpenBlank" type="button">Open in about:blank</button><button id="browserOpenDirect" type="button">Direct ↗</button></div>
+          </div>
+        </div>
+        <p class="browser-tip">Browser restrictions are enforced by each website. A new window cannot bypass X-Frame-Options, Content-Security-Policy, or network filters. Back/Forward track addresses entered in this toolbar.</p>
+      </section>
+
+      <section id="panel-settings" class="panel" aria-label="Settings" hidden>
+        <div class="section-heading"><div><div class="eyebrow">MAKE IT YOURS</div><h2>Settings</h2><p>Personalize the window and manage your session.</p></div></div>
+        <div class="settings-grid">
+          <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-settings"/></svg></div><h3>Tab appearance</h3><p>Choose a preset browser-tab title and favicon for this window. Changes reset when the page reloads.</p><div class="settings-detail"><span>Current preset</span><strong id="currentPreset">Google Drive</strong></div><button id="openPresets" type="button" class="action-btn primary"><svg class="icon"><use href="#i-settings"/></svg> Customize tab appearance</button></article>
+          <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-external"/></svg></div><h3>Stealth launcher</h3><p>Open this page in an about:blank window, then navigate the original tab away. Your browser may block the pop-up or embedded page.</p><div class="settings-detail"><span>Launch mode</span><strong>New window</strong></div><button id="settingsStealth" type="button" class="action-btn primary"><svg class="icon"><use href="#i-external"/></svg> Launch Stealth (about:blank)</button></article>
+          <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-game"/></svg></div><h3>Touch controls</h3><p>Use bigger tap targets and responsive press feedback for the calculator, navigation, game cards, and browser controls.</p><div class="settings-detail"><span>Large touch targets</span><strong id="touchModeStatus">Off</strong></div><button id="touchModeToggle" type="button" class="action-btn" aria-pressed="false"><svg class="icon"><use href="#i-check"/></svg> <span id="touchModeText">Enable touch mode</span></button></article>
+          <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-shield"/></svg></div><h3>Session controls</h3><p>Lock the dashboard and return to the calculator. Nothing about your unlocked session is saved between page loads.</p><div class="settings-detail"><span>Saved login state</span><strong>None</strong></div><button id="lockSession" type="button" class="action-btn"><svg class="icon"><use href="#i-lock"/></svg> Lock & return to calculator</button></article>
+        </div>
+        <div class="security-notes"><strong>Browser note:</strong> This page does not use localStorage or sessionStorage. Browser and network administrators may still see page visits, DNS requests, or other traffic; changing a tab title or using about:blank does not guarantee privacy or erase records.</div>
+      </section>
+      <footer class="footer"><span>NEXUS / A lightweight, self-contained experience</span><span>Press Esc or ~ to navigate away · Built with vanilla HTML, CSS & JS</span></footer>
+    </main>
+  </div>
+
+  <div id="presetModal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="presetsHeading">
+      <div class="modal-heading"><div><div class="eyebrow">TAB CUSTOMIZER</div><h3 id="presetsHeading">Choose an appearance</h3></div><button type="button" class="close-x" id="closePresets" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <div id="presetList" class="preset-list"></div>
+      <div class="modal-footer"><button type="button" class="action-btn" id="cancelPresets">Cancel</button><button type="button" class="action-btn primary" id="savePresets">Apply preset</button></div>
+    </div>
+  </div>
+
+  <div id="theaterModal" class="modal-backdrop theater-backdrop" hidden>
+    <div class="theater" role="dialog" aria-modal="true" aria-labelledby="theaterTitle">
+      <div class="theater-header"><div id="theaterTitle" class="theater-name">Game <span>FULLSCREEN VIEWER</span></div><div class="theater-actions"><button id="theaterBlank" type="button" class="action-btn"><svg class="icon"><use href="#i-external"/></svg> Open about:blank</button><button id="theaterClose" type="button" class="theater-close">Close Game ✕</button></div></div>
+      <div class="theater-content"><iframe id="theaterFrame" class="theater-frame" title="Game viewer" src="about:blank" allow="fullscreen; autoplay; gamepad" referrerpolicy="no-referrer"></iframe></div>
+      <div class="theater-footer"><span>If the game won't load, its host may prohibit iframe embedding.</span><button id="theaterDirect" type="button">Open on game website ↗</button></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      // All state is kept in memory. Intentionally no localStorage, sessionStorage, or cookies.
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => [...document.querySelectorAll(selector)];
+      const calculatorView = $('#calculatorView');
+      const dashboardView = $('#dashboardView');
+      const previousEl = $('#calcPrevious');
+      const currentEl = $('#calcCurrent');
+      const symbols = { '+':'+', '-':'−', '*':'×', '/':'÷' };
+      let current = '0', firstOperand = null, operator = null, waitingForSecond = false;
+      let previousExpression = '', justEvaluated = false, unlocked = false, activeCategory = 'All';
+      let preset = 'drive', draftPreset = 'drive', activeGame = null, toastTimer;
+
+      const PRESETS = {
+        drive: { name:'Google Drive', title:'My Drive - Google Drive', favicon:'https://drive.google.com/favicon.ico', glyph:'▲', note:'Cloud file manager' },
+        classroom: { name:'Google Classroom', title:'Classes - Google Classroom', favicon:'https://classroom.google.com/favicon.ico', glyph:'▣', note:'Class assignments' },
+        docs: { name:'Google Docs', title:'Untitled document - Google Docs', favicon:'https://docs.google.com/favicon.ico', glyph:'▤', note:'Online documents' },
+        canvas: { name:'Canvas', title:'Dashboard', favicon:'https://canvas.instructure.com/favicon.ico', glyph:'◈', note:'Learning dashboard' }
+      };
+      const GAMES = [
+        { id:'roblox', title:'Roblox', category:'Apps', subtitle:'Discover countless community experiences.', url:'https://www.roblox.com', symbol:'◈', gradient:'linear-gradient(145deg,#34354d,#151822 80%)', artLabel:'CREATE • PLAY' },
+        { id:'subway', title:'Subway Surfers', category:'Action', subtitle:'Dash, dodge and outrun the inspector.', url:'https://poki.com/en/g/subway-surfers', symbol:'⚡', gradient:'linear-gradient(125deg,#ff953b,#dd4e74 73%,#582887)', artLabel:'ENDLESS RUNNER' },
+        { id:'temple', title:'Temple Run 2', category:'Action', subtitle:'Navigate perilous paths and ancient ruins.', url:'https://poki.com/en/g/temple-run-2', symbol:'◆', gradient:'linear-gradient(125deg,#3f9d7c,#1b655d 58%,#143b52)', artLabel:'ESCAPE THE RUINS' },
+        { id:'geometry', title:'Geometry Dash', category:'Arcade', subtitle:'Time your jumps in a neon rhythm world.', url:'https://poki.com/en/g/geometry-dash', symbol:'▣', gradient:'linear-gradient(125deg,#9565ef,#5c48ce 68%,#2e347c)', artLabel:'RHYTHM & TIMING' },
+        { id:'crossy', title:'Crossy Road', category:'Arcade', subtitle:'One more hop. One more impossible crossing.', url:'https://poki.com/en/g/crossy-road', symbol:'✦', gradient:'linear-gradient(135deg,#ffbf66,#fa7e5d 62%,#cc436f)', artLabel:'HOP TO IT' },
+        { id:'slope', title:'Slope', category:'Arcade', subtitle:'Stay on the track as the speed ramps up.', url:'https://slopegame.com/', symbol:'●', gradient:'linear-gradient(125deg,#11b8b4,#136d95 62%,#302b83)', artLabel:'3D SPEED RUN' }
+      ];
+
+      function toast(message) {
+        const node = $('#toast'); node.textContent = message; node.classList.add('visible');
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => node.classList.remove('visible'), 3400);
+      }
+      function displayNumber(value) {
+        if (value === 'Error') return 'Error';
+        const [int, fraction] = String(value).split('.');
+        const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return fraction !== undefined ? `${formatted}.${fraction}` : formatted;
+      }
+      function updateCalc() {
+        currentEl.textContent = displayNumber(current);
+        previousEl.textContent = previousExpression || '\u00a0';
+        $$('.calc-key.operator').forEach((btn) => btn.classList.toggle('selected', btn.dataset.key === operator && waitingForSecond));
+        const len = displayNumber(current).length;
+        currentEl.style.fontSize = len > 14 ? '33px' : len > 10 ? '44px' : '';
+      }
+      function resetCalc() { current='0'; firstOperand=null; operator=null; waitingForSecond=false; previousExpression=''; justEvaluated=false; updateCalc(); }
+      function enterDigit(value) {
+        if (current === 'Error') resetCalc();
+        if (waitingForSecond || justEvaluated) {
+          current = value === '.' ? '0.' : value;
+          waitingForSecond = false; justEvaluated = false;
+          if (!operator) previousExpression = '';
+        } else if (value === '.') {
+          if (!current.includes('.')) current += '.';
+        } else if (current.replace(/[-.]/g,'').length < 15) {
+          current = current === '0' ? value : current === '-0' ? '-' + value : current + value;
+        }
+        updateCalc();
+      }
+      function calculate(a, b, op) {
+        let result;
+        if (op === '+') result = a+b;
+        else if (op === '-') result = a-b;
+        else if (op === '*') result = a*b;
+        else if (op === '/') result = b === 0 ? NaN : a/b;
+        else return b;
+        return Number.isFinite(result) ? Number(result.toPrecision(12)) : NaN;
+      }
+      function pressOperator(nextOp) {
+        if (current === 'Error') return;
+        const input = Number(current);
+        if (operator && !waitingForSecond && firstOperand !== null) {
+          const result = calculate(firstOperand, input, operator);
+          if (!Number.isFinite(result)) { current='Error'; firstOperand=null; operator=null; previousExpression='Cannot divide by zero'; updateCalc(); return; }
+          current = String(result); firstOperand = result;
+        } else if (firstOperand === null || justEvaluated) firstOperand = input;
+        operator = nextOp; waitingForSecond = true; justEvaluated = false;
+        previousExpression = `${displayNumber(String(firstOperand))} ${symbols[operator]}`;
+        updateCalc();
+      }
+      function unlockDashboard() {
+        if (unlocked) return;
+        unlocked = true;
+        calculatorView.classList.add('leaving');
+        setTimeout(() => {
+          calculatorView.hidden = true;
+          dashboardView.hidden = false;
+          switchPage('games');
+          window.scrollTo(0,0);
+        }, 290);
+      }
+      function equals() {
+        if (current === '1313' && operator === null && firstOperand === null) { unlockDashboard(); return; }
+        if (!operator || waitingForSecond || firstOperand === null || current === 'Error') return;
+        const second = Number(current), answer = calculate(firstOperand, second, operator);
+        previousExpression = `${displayNumber(String(firstOperand))} ${symbols[operator]} ${displayNumber(current)} =`;
+        current = Number.isFinite(answer) ? String(answer) : 'Error';
+        operator = null; firstOperand = null; waitingForSecond = false; justEvaluated = true; updateCalc();
+      }
+      function backspace() {
+        if (current === 'Error') { resetCalc(); return; }
+        if (waitingForSecond || justEvaluated) { current='0'; waitingForSecond=false; justEvaluated=false; if (!operator) previousExpression=''; }
+        else { current = current.length <= 1 || (current.length===2 && current[0]==='-') ? '0' : current.slice(0,-1); }
+        updateCalc();
+      }
+      function calcKey(key) {
+        if (/^[0-9.]$/.test(key)) enterDigit(key);
+        else if (key==='AC') resetCalc();
+        else if (key==='sign') { if (current!=='0' && current!=='Error') current = current.startsWith('-') ? current.slice(1) : '-'+current; updateCalc(); }
+        else if (key==='percent') { if (current!=='Error') current=String(Number((Number(current)/100).toPrecision(12))); updateCalc(); }
+        else if ('+-*/'.includes(key)) pressOperator(key);
+        else if (key==='=') equals();
+        else if (key==='Backspace') backspace();
+      }
+      $('#calcGrid').addEventListener('click', (event) => { const btn=event.target.closest('[data-key]'); if (!btn) return; calcKey(btn.dataset.key); });
+
+      // Quick exit is intentionally global and takes priority over modal/keyboard handling.
+      function panic() { window.location.replace('https://google.com'); }
+      $$('[data-panic]').forEach(btn => btn.addEventListener('click', panic));
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' || event.key === '~') { event.preventDefault(); panic(); return; }
+        if (!dashboardView.hidden || event.ctrlKey || event.altKey || event.metaKey) return;
+        const tag = (event.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || event.target.isContentEditable) return;
+        let key = event.key;
+        if (key === 'Enter') key='=';
+        if (key === 'x' || key === 'X') key='*';
+        if (key === 'Delete' || key.toLowerCase() === 'c') key='AC';
+        if (/^[0-9.]$/.test(key) || ['+','-','*','/','=','Backspace','AC'].includes(key)) {
+          event.preventDefault(); calcKey(key);
+          const clicked = $$('.calc-key').find(btn=>btn.dataset.key===key);
+          if (clicked) { clicked.classList.add('pressed'); setTimeout(()=>clicked.classList.remove('pressed'),100); }
+        }
+      });
+
+      function applyPreset(name) {
+        const option=PRESETS[name]; if (!option) return;
+        preset = name; document.title = option.title;
+        const link=$('#tabFavicon'); link.href=option.favicon;
+        $('#currentPreset').textContent=option.name;
+      }
+      function closePresets() { $('#presetModal').hidden=true; }
+      function renderPresets() {
+        $('#presetList').innerHTML = Object.entries(PRESETS).map(([key, value]) => `
+          <button type="button" class="preset-option ${key===draftPreset?'selected':''}" data-preset="${key}" aria-pressed="${key===draftPreset}">
+            <span class="preset-symbol">${value.glyph}</span><span><span class="preset-name">${value.name}</span><span class="preset-sub">${value.note}</span></span>
+            ${key===draftPreset?'<svg class="icon preset-check"><use href="#i-check"/></svg>':''}
+          </button>`).join('');
+      }
+      $('#openPresets').addEventListener('click',()=>{ draftPreset=preset; renderPresets(); $('#presetModal').hidden=false; });
+      $('#presetList').addEventListener('click',event=>{ const button=event.target.closest('[data-preset]'); if (!button) return; draftPreset=button.dataset.preset; renderPresets(); });
+      $('#savePresets').addEventListener('click',()=>{ applyPreset(draftPreset); closePresets(); toast(`${PRESETS[preset].name} appearance applied for this session.`); });
+      $('#closePresets').addEventListener('click',closePresets);
+      $('#cancelPresets').addEventListener('click',closePresets);
+      $('#presetModal').addEventListener('click',(event)=>{ if (event.target.id==='presetModal') closePresets(); });
+
+      function openFramedWindow(targetUrl, shouldReplaceOriginal=false) {
+        // Browser policies may disallow popups or the destination's frame embedding.
+        const win=window.open('about:blank','_blank');
+        if (!win) { toast('Pop-up blocked. Allow pop-ups for this website and try again.'); return false; }
+        try {
+          const doc=win.document;
+          doc.title=PRESETS.drive.title;
+          const favicon=doc.createElement('link'); favicon.rel='icon'; favicon.href=PRESETS.drive.favicon;
+          doc.head.appendChild(favicon);
+          const viewport=doc.createElement('meta'); viewport.name='viewport';viewport.content='width=device-width, initial-scale=1';doc.head.appendChild(viewport);
+          doc.documentElement.style.cssText='margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#101218';
+          doc.body.style.cssText='margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#101218';
+          const frame=doc.createElement('iframe'); frame.src=targetUrl;
+          frame.title='Content'; frame.style.cssText='display:block;width:100vw;height:100vh;border:none;';
+          frame.setAttribute('allow','fullscreen; autoplay; gamepad');
+          frame.setAttribute('referrerpolicy','no-referrer');
+          doc.body.appendChild(frame);
+          try { win.opener=null; } catch (_) { /* optional browser hardening */ }
+          if (shouldReplaceOriginal) window.location.replace('https://google.com');
+          return true;
+        } catch (error) {
+          try { win.close(); } catch (_) { /* no-op */ }
+          toast('Could not create the new window in this browser.');
+          return false;
+        }
+      }
+      function launchStealth() { openFramedWindow(window.location.href, true); }
+      $('#settingsStealth').addEventListener('click',launchStealth);
+
+      function switchPage(page) {
+        $$('.nav-btn').forEach(btn => {
+          const active=btn.dataset.page===page;btn.classList.toggle('active',active);
+          if (active) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+        });
+        $$('.panel').forEach(panel => panel.hidden=(panel.id!==`panel-${page}`));
+      }
+      $$('.nav-btn').forEach(btn => btn.addEventListener('click',()=>switchPage(btn.dataset.page)));
+      $('#lockSession').addEventListener('click',()=>{
+        closePresets(); closeTheater(); resetCalc(); applyPreset('drive');
+        unlocked=false; dashboardView.hidden=true; calculatorView.hidden=false;
+        calculatorView.classList.remove('leaving'); window.scrollTo(0,0);
+      });
+
+      function renderGames() {
+        const query=$('#gameSearch').value.trim().toLowerCase();
+        const filtered=GAMES.filter(game => (activeCategory==='All'||activeCategory===game.category) &&
+          `${game.title} ${game.category} ${game.subtitle}`.toLowerCase().includes(query));
+        $('#gamesGrid').innerHTML=filtered.map(game=>`
+          <article class="game-card">
+            <div class="game-art" style="--art:${game.gradient}"><span class="game-symbol" aria-hidden="true">${game.symbol}</span><span class="art-sub">${game.artLabel}</span></div>
+            <div class="game-info"><div class="game-title-row"><h3 class="game-title">${game.title}</h3><span class="game-category">${game.category}</span></div>
+            <p class="game-description">${game.subtitle}</p>
+            <button type="button" class="play-btn" data-play="${game.id}"><svg class="icon"><use href="#i-play"/></svg> Play Now <svg class="icon"><use href="#i-arrow"/></svg></button>
+            </div>
+          </article>`).join('');
+        $('#gameCount').textContent=`${filtered.length} ${filtered.length===1?'experience':'experiences'}`;
+        $('#emptyGames').hidden=filtered.length!==0;
+      }
+      $('#gameSearch').addEventListener('input',renderGames);
+      $$('.filter-pill').forEach(btn=>btn.addEventListener('click',()=>{
+        activeCategory=btn.dataset.category;
+        $$('.filter-pill').forEach(pill=>{ const active=pill===btn; pill.classList.toggle('selected',active); pill.setAttribute('aria-pressed',String(active)); });
+        renderGames();
+      }));
+      $('#gamesGrid').addEventListener('click',event=>{
+        const btn=event.target.closest('[data-play]');if (!btn) return;
+        const game=GAMES.find(item=>item.id===btn.dataset.play);if (game) openTheater(game);
+      });
+      function openTheater(game) {
+        activeGame=game;
+        $('#theaterTitle').innerHTML=`${game.title} <span>FULLSCREEN VIEWER</span>`;
+        $('#theaterFrame').src=game.url;
+        $('#theaterModal').hidden=false;
+        document.body.style.overflow='hidden';
+      }
+      function closeTheater() {
+        $('#theaterModal').hidden=true;
+        $('#theaterFrame').src='about:blank';
+        activeGame=null; document.body.style.overflow='';
+      }
+      $('#theaterClose').addEventListener('click',closeTheater);
+      $('#theaterBlank').addEventListener('click',()=>{ if (activeGame) openFramedWindow(activeGame.url); });
+      $('#theaterDirect').addEventListener('click',()=>{ if (activeGame) window.open(activeGame.url,'_blank','noopener,noreferrer'); });
+
+      // Browser navigation remembers only URLs typed into the address bar or bookmarks;
+      // cross-origin iframe-internal navigation cannot reliably be observed by its parent.
+      let browserHistory=['https://duckduckgo.com'];let browserIndex=0;
+      function normalizeAddress(value) {
+        const trimmed=value.trim(); if (!trimmed) return null;
+        let raw;
+        if (/^https?:\/\//i.test(trimmed)) raw=trimmed;
+        else if (/^(localhost|[a-z\d-]+(\.[a-z\d-]+)+)(:\d+)?([/?#].*)?$/i.test(trimmed)) raw='https://'+trimmed;
+        else raw='https://duckduckgo.com/?q='+encodeURIComponent(trimmed);
+        try { const url=new URL(raw);return ['https:','http:'].includes(url.protocol)?url.href:null; } catch (_) { return null; }
+      }
+      function browserNavigate(address,addHistory=true) {
+        if (!address) { toast('Enter a valid URL or search query.');return; }
+        $('#browserFrame').src=address;$('#browserUrl').value=address;
+        if (addHistory) { browserHistory=browserHistory.slice(0,browserIndex+1);browserHistory.push(address);browserIndex++; }
+        $('#browserBack').disabled=browserIndex===0;
+        $('#browserForward').disabled=browserIndex>=browserHistory.length-1;
+      }
+      $('#browserForm').addEventListener('submit',event=>{event.preventDefault();browserNavigate(normalizeAddress($('#browserUrl').value));});
+      $('#browserBack').addEventListener('click',()=>{ if (browserIndex>0) { browserIndex--;browserNavigate(browserHistory[browserIndex],false); } });
+      $('#browserForward').addEventListener('click',()=>{ if (browserIndex<browserHistory.length-1) { browserIndex++;browserNavigate(browserHistory[browserIndex],false); } });
+      $('#browserRefresh').addEventListener('click',()=>{ const frame=$('#browserFrame');frame.src=browserHistory[browserIndex]; });
+      $$('.bookmark').forEach(btn=>btn.addEventListener('click',()=>browserNavigate(btn.dataset.link)));
+      $('#browserOpenBlank').addEventListener('click',()=>openFramedWindow(browserHistory[browserIndex]));
+      $('#browserOpenDirect').addEventListener('click',()=>window.open(browserHistory[browserIndex],'_blank','noopener,noreferrer'));
+
+
+      // Browser click events are fired on taps as well as mouse clicks. Pointer
+      // handlers add instant tactile feedback without double-invoking actions.
+      let touchMode = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      function setTouchMode(enabled) {
+        touchMode = enabled;
+        document.documentElement.classList.toggle('touch-mode', enabled);
+        $('#touchModeStatus').textContent = enabled ? 'On' : 'Off';
+        $('#touchModeText').textContent = enabled ? 'Disable touch mode' : 'Enable touch mode';
+        $('#touchModeToggle').setAttribute('aria-pressed', String(enabled));
+      }
+      $('#touchModeToggle').addEventListener('click', () => setTouchMode(!touchMode));
+      setTouchMode(touchMode);
+      document.addEventListener('pointerdown', event => {
+        if (event.pointerType === 'mouse') return;
+        const button = event.target.closest('button');
+        if (button && !button.disabled) button.classList.add('touch-pressed');
+      }, { passive: true });
+      for (const type of ['pointerup', 'pointercancel']) {
+        document.addEventListener(type, () => {
+          $$('.touch-pressed').forEach(button => button.classList.remove('touch-pressed'));
+        }, { passive: true });
+      }
+
+      // Reset the tab to its default look on every fresh load. No persistent state is read.
+      applyPreset('drive');resetCalc();renderGames();
+    })();
+  </script>
+</body>
+</html>
