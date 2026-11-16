@@ -308,6 +308,25 @@
     .game-launch-notice p { max-width:430px; line-height:1.7; color:#aeb5cb; font-size:14px; margin:0; }
     .game-launch-notice small { color:#979db4; font-size:11px; }
     @media (max-height:600px) { .game-launch-notice { justify-content:flex-start; } .launch-symbol { width:60px; height:60px; font-size:35px; } }
+    .arcade-panel { height:100%; min-height:0; display:flex; flex-direction:column; background:#090e1a; }
+    .arcade-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 22px; background:#111827; border-bottom:1px solid #ffffff12; flex-shrink:0; }
+    .arcade-stats { display:flex; gap:30px; }
+    .arcade-stats span { display:block; color:#9aa8c3; font-size:9px; letter-spacing:.15em; font-weight:700; }
+    .arcade-stats strong { display:block; margin-top:3px; color:#e9faff; font-size:22px; font-variant-numeric:tabular-nums; letter-spacing:.06em; }
+    .arcade-tools { display:flex; gap:8px; }
+    .arcade-stage { min-height:100px; flex:1; position:relative; overflow:hidden; background:#080d18; }
+    #arcadeCanvas { display:block; width:100%; height:100%; object-fit:contain; outline-offset:-3px; touch-action:none; }
+    .arcade-overlay { position:absolute; inset:0; display:grid; place-items:center; padding:16px; background:#050a1666; backdrop-filter:blur(6px); overflow:auto; }
+    .arcade-message { width:min(420px,100%); padding:30px; text-align:center; border:1px solid #9d9bff44; border-radius:22px; background:linear-gradient(140deg,#20253df5,#101827f5); box-shadow:0 24px 80px #0008; }
+    .arcade-message h2 { font-size:clamp(24px,4vw,36px); letter-spacing:-.04em; margin:12px 0; }
+    .arcade-message p { color:#b5c2dc; font-size:13px; line-height:1.7; margin:0 0 22px; }
+    .arcade-message .action-btn { min-width:160px; min-height:46px; }
+    .arcade-controls { display:flex; justify-content:center; gap:12px; padding:10px 16px 0; flex-shrink:0; }
+    .arcade-controls button { min-width:72px; height:46px; border:1px solid #8c95c64a; border-radius:12px; background:#1e2840; color:#dbe9ff; font-weight:700; font-size:19px; touch-action:none; }
+    .arcade-controls button:active { background:#3c476c; transform:scale(.96); }
+    .arcade-instructions { margin:9px 12px 12px; color:#a4b3ce; font-size:11px; line-height:1.6; text-align:center; flex-shrink:0; }
+    @media(max-width:520px) { .arcade-toolbar { padding:9px 12px; } .arcade-stats { gap:15px; } .arcade-stats strong { font-size:18px; } .arcade-controls button { min-width:55px; } .arcade-message { padding:22px; } }
+    @media(max-height:600px) { .arcade-message { padding:14px; } .arcade-message h2 { margin:6px 0; font-size:24px; } .arcade-message p { margin-bottom:12px; } .arcade-controls { padding-top:5px; } .arcade-instructions { margin:4px 8px; } .arcade-toolbar { padding-block:6px; } }
   </style>
 </head>
 <body>
@@ -388,7 +407,7 @@
         <div class="hero">
           <div class="hero-content"><div class="hero-badge"><span class="sparkle">✦</span> YOUR DIGITAL PLAYGROUND</div>
             <h1>Good to see you.<br><span>What are we playing?</span></h1>
-            <p>Jump into a game, discover something new, or launch a web experience — all in one place.</p>
+            <p>Five original games. No downloads. Pick a challenge and play right here.</p>
           </div>
           <div class="hero-stat" aria-hidden="true"><svg class="icon"><use href="#i-game"/></svg></div>
         </div>
@@ -401,7 +420,7 @@
             <button type="button" class="filter-pill" data-category="Apps" aria-pressed="false">Apps</button>
           </div>
         </div>
-        <div class="section-heading"><div><div class="eyebrow">EXPLORE THE COLLECTION</div><h2>Games & Apps</h2></div><div id="gameCount" class="subtle-count" role="status">6 experiences</div></div>
+        <div class="section-heading"><div><div class="eyebrow">EXPLORE THE COLLECTION</div><h2>Games & Apps</h2></div><div id="gameCount" class="subtle-count" role="status">5 games · 1 app</div></div>
         <div id="gamesGrid" class="games-grid"></div>
         <div id="emptyGames" class="empty-results" hidden><strong>Nothing found</strong>Try another search or a different category.</div>
       </section>
@@ -451,6 +470,26 @@
     <div class="theater" role="dialog" aria-modal="true" aria-labelledby="theaterTitle">
       <div class="theater-header"><div id="theaterTitle" class="theater-name">Game <span>FULLSCREEN VIEWER</span></div><div class="theater-actions"><button id="theaterBlank" type="button" class="action-btn" aria-label="Open game in about:blank"><svg class="icon"><use href="#i-external"/></svg> Open about:blank</button><button data-panic type="button" class="action-btn panic" aria-label="Panic (Esc)"><svg class="icon"><use href="#i-power"/></svg> Panic (Esc)</button><button id="theaterClose" type="button" class="theater-close">Close Game ✕</button></div></div>
       <div class="theater-content">
+        <section id="arcadePanel" class="arcade-panel" aria-label="Original arcade game" hidden>
+          <div class="arcade-toolbar">
+            <div class="arcade-stats"><div><span>SCORE</span><strong id="arcadeScore">0000</strong></div><div><span>SESSION BEST</span><strong id="arcadeBest">0000</strong></div></div>
+            <div class="arcade-tools"><button id="arcadePause" type="button" class="action-btn" disabled>Pause</button><button id="arcadeRestart" type="button" class="action-btn">Restart</button></div>
+          </div>
+          <div class="arcade-stage">
+            <canvas id="arcadeCanvas" width="900" height="500" tabindex="0" role="img" aria-label="Arcade game" aria-describedby="arcadeInstructions">This game requires a browser with Canvas support.</canvas>
+            <div id="arcadeOverlay" class="arcade-overlay">
+              <div class="arcade-message"><div class="eyebrow">NEXUS ORIGINALS</div><h2 id="arcadeOverlayTitle">Ready to play?</h2><p id="arcadeOverlayText"></p><button id="arcadeStart" type="button" class="action-btn primary">Start game</button></div>
+            </div>
+          </div>
+          <div class="arcade-controls" role="group" aria-label="Game controls">
+            <button type="button" data-game-action="left" aria-label="Move left">←</button>
+            <button type="button" data-game-action="up" aria-label="Hop forward">↑</button>
+            <button type="button" data-game-action="jump">Jump ↑</button>
+            <button type="button" data-game-action="down" aria-label="Hop backward">↓</button>
+            <button type="button" data-game-action="right" aria-label="Move right">→</button>
+          </div>
+          <p id="arcadeInstructions" class="arcade-instructions"></p>
+        </section>
         <div id="gameLaunchNotice" class="game-launch-notice" hidden>
           <div id="launchSymbol" class="launch-symbol" aria-hidden="true"></div>
           <div class="eyebrow">PLAY ON THE GAME WEBSITE</div>
@@ -460,7 +499,7 @@
           <small>about:blank cannot override the provider’s embedding policy.</small>
         </div>
         <iframe id="theaterFrame" class="theater-frame" title="Game viewer" src="about:blank" allow="fullscreen; autoplay; gamepad" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-downloads" referrerpolicy="no-referrer"></iframe></div>
-      <div class="theater-footer"><span>Not loading? The host may block embeds. Use the direct link. Keys cannot reach this page while a game has focus.</span><button id="theaterDirect" type="button">Open on game website ↗</button></div>
+      <div class="theater-footer"><span id="theaterHint">Not loading? The host may block embeds. Use the direct link. Keys cannot reach this page while a game has focus.</span><button id="theaterDirect" type="button">Open on game website ↗</button></div>
     </div>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -489,12 +528,12 @@
         canvas: { name:'Canvas', title:'Dashboard', favicon:'https://canvas.instructure.com/favicon.ico', glyph:'◈', note:'Learning dashboard' }
       };
       const GAMES = [
-        { id:'roblox', launchOnly:true, title:'Roblox', category:'Apps', subtitle:'Discover countless community experiences.', url:'https://www.roblox.com', symbol:'◈', gradient:'linear-gradient(145deg,#34354d,#151822 80%)', artLabel:'CREATE • PLAY' },
-        { id:'subway', launchOnly:true, title:'Subway Surfers', category:'Action', subtitle:'Dash, dodge and outrun the inspector.', url:'https://poki.com/en/g/subway-surfers', symbol:'⚡', gradient:'linear-gradient(125deg,#ff953b,#dd4e74 73%,#582887)', artLabel:'ENDLESS RUNNER' },
-        { id:'temple', launchOnly:true, title:'Temple Run 2', category:'Action', subtitle:'Navigate perilous paths and ancient ruins.', url:'https://poki.com/en/g/temple-run-2', symbol:'◆', gradient:'linear-gradient(125deg,#3f9d7c,#1b655d 58%,#143b52)', artLabel:'ESCAPE THE RUINS' },
-        { id:'geometry', launchOnly:true, title:'Geometry Dash', category:'Arcade', subtitle:'Time your jumps in a neon rhythm world.', url:'https://poki.com/en/g/geometry-dash', symbol:'▣', gradient:'linear-gradient(125deg,#9565ef,#5c48ce 68%,#2e347c)', artLabel:'RHYTHM & TIMING' },
-        { id:'crossy', launchOnly:true, title:'Crossy Road', category:'Arcade', subtitle:'One more hop. One more impossible crossing.', url:'https://poki.com/en/g/crossy-road', symbol:'✦', gradient:'linear-gradient(135deg,#ffbf66,#fa7e5d 62%,#cc436f)', artLabel:'HOP TO IT' },
-        { id:'slope', title:'Slope', category:'Arcade', subtitle:'Stay on the track as the speed ramps up.', url:'https://slopegame.com/', symbol:'●', gradient:'linear-gradient(125deg,#11b8b4,#136d95 62%,#302b83)', artLabel:'3D SPEED RUN' }
+        { id:'rush', mode:'rush', title:'Neon Rush', category:'Action', subtitle:'Switch lanes, leap over barriers, and collect gold rings.', symbol:'⚡', gradient:'linear-gradient(125deg,#ff953b,#dd4e74 73%,#582887)', artLabel:'ORIGINAL · PLAY HERE' },
+        { id:'ruins', mode:'ruins', title:'Ruins Runner', category:'Action', subtitle:'Jump fallen stones and gaps in an endless ancient city.', symbol:'◆', gradient:'linear-gradient(125deg,#3f9d7c,#1b655d 58%,#143b52)', artLabel:'ORIGINAL · PLAY HERE' },
+        { id:'pulse', mode:'pulse', title:'Pulse Jump', category:'Arcade', subtitle:'One cube. A neon world. Find your timing and clear the spikes.', symbol:'▣', gradient:'linear-gradient(125deg,#9565ef,#5c48ce 68%,#2e347c)', artLabel:'ORIGINAL · PLAY HERE' },
+        { id:'crossing', mode:'crossing', title:'Pixel Crossing', category:'Arcade', subtitle:'Dodge traffic, hop to safety, and reach the other side.', symbol:'✦', gradient:'linear-gradient(135deg,#ffbf66,#fa7e5d 62%,#cc436f)', artLabel:'ORIGINAL · PLAY HERE' },
+        { id:'slope', mode:'slope', title:'Vector Slope', category:'Arcade', subtitle:'Steer a glowing ball along a winding course. Stay on track.', symbol:'●', gradient:'linear-gradient(125deg,#11b8b4,#136d95 62%,#302b83)', artLabel:'ORIGINAL · PLAY HERE' },
+        { id:'roblox', launchOnly:true, title:'Roblox', category:'Apps', subtitle:'External app. Roblox requires its own website and client.', url:'https://www.roblox.com', symbol:'◈', gradient:'linear-gradient(145deg,#34354d,#151822 80%)', artLabel:'EXTERNAL APP' }
       ];
 
       function toast(message) {
@@ -651,7 +690,7 @@
         if (event.key!=='Tab') return;
         const modal=$$('.modal-backdrop').find(node=>!node.hidden);
         if (!modal) return;
-        const targets=[...modal.querySelectorAll('button:not(:disabled), iframe, [tabindex="0"]')];
+        const targets=[...modal.querySelectorAll('button:not(:disabled), iframe, [tabindex="0"]')].filter(node=>!node.closest('[hidden]'));
         const first=targets[0], last=targets[targets.length-1];
         if (event.shiftKey && document.activeElement===first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement===last) { event.preventDefault(); first.focus(); }
@@ -739,7 +778,7 @@
             <div class="game-art" style="--art:${game.gradient}"><span class="game-symbol" aria-hidden="true">${game.symbol}</span><span class="art-sub">${game.artLabel}</span></div>
             <div class="game-info"><div class="game-title-row"><h3 class="game-title">${game.title}</h3><span class="game-category">${game.category}</span></div>
             <p class="game-description">${game.subtitle}</p>
-            <button type="button" class="play-btn" data-play="${game.id}" aria-label="Play ${game.title}"><svg class="icon"><use href="#i-play"/></svg> Play Now <svg class="icon"><use href="#i-arrow"/></svg></button>
+            <button type="button" class="play-btn" data-play="${game.id}" aria-label="${game.mode?'Play':'Open'} ${game.title}"><svg class="icon"><use href="#i-play"/></svg> ${game.mode?'Play Now':'Open Roblox ↗'} <svg class="icon"><use href="#i-arrow"/></svg></button>
             </div>
           </article>`).join('');
         $('#gameCount').textContent=`${filtered.length} ${filtered.length===1?'experience':'experiences'}`;
@@ -757,25 +796,323 @@
       });
       function openTheater(game,trigger) {
         activeGame=game;
-        $('#theaterTitle').innerHTML=`${game.title} <span>FULLSCREEN VIEWER</span>`;
-        $('#theaterFrame').hidden=!!game.launchOnly;
-        $('#theaterFrame').src=game.launchOnly ? 'about:blank' : game.url;
-        $('#gameLaunchNotice').hidden=!game.launchOnly;
+        $('#theaterTitle').innerHTML=`${game.title} <span>${game.mode?'NEXUS ORIGINAL':'EXTERNAL APP'}</span>`;
+        $('#theaterFrame').hidden=true; $('#theaterFrame').src='about:blank';
+        $('#arcadePanel').hidden=!game.mode; $('#gameLaunchNotice').hidden=!!game.mode;
+        $('#theaterBlank').hidden=!!game.mode; $('#theaterDirect').hidden=!!game.mode;
+        $('#theaterHint').textContent=game.mode ? 'Original game · Runs on this page · Scores reset on reload' : 'Roblox runs on its own website and client.';
         $('#launchTitle').textContent=game.title; $('#launchSymbol').textContent=game.symbol;
         $('#launchSymbol').style.background=game.gradient;
-        $('#theaterFrame').title=game.title;
-        showModal('#theaterModal','#theaterClose',trigger);
+        showModal('#theaterModal',game.mode?'#arcadeStart':'#theaterClose',trigger);
+        if(game.mode)arcade.load(game.mode);
       }
       function closeTheater() {
-        hideModal('#theaterModal');
-        $('#theaterFrame').src='about:blank';
+        arcade.stop(); hideModal('#theaterModal');
+        $('#theaterFrame').src='about:blank'; $('#arcadePanel').hidden=true;
         activeGame=null; document.body.style.overflow='';
       }
       $('#theaterClose').addEventListener('click',closeTheater);
-      $('#theaterBlank').addEventListener('click',()=>{ if (activeGame) openFramedWindow(activeGame.url); });
-      function openGameDirect() { if (activeGame) window.open(activeGame.url,'_blank','noopener,noreferrer'); }
+      $('#theaterBlank').addEventListener('click',()=>{ if (activeGame?.url) openFramedWindow(activeGame.url); });
+      function openGameDirect() { if (activeGame?.url) window.open(activeGame.url,'_blank','noopener,noreferrer'); }
       $('#theaterDirect').addEventListener('click',openGameDirect);
       $('#launchGameDirect').addEventListener('click',openGameDirect);
+
+      // Five original Canvas games. All art, simulation, and state stay in this document.
+      function createArcade() {
+        const canvas=$('#arcadeCanvas'), overlay=$('#arcadeOverlay');
+        let ctx=null, state=null, frameId=0, previousTime=0;
+        const held=new Set(), best=Object.create(null), W=900, H=500;
+        const palette={rush:['#ffae70','#ff637c'],ruins:['#f8d288','#66dfb2'],pulse:['#b1a0ff','#6ee7ff'],crossing:['#ffe18b','#78deb3'],slope:['#64ffe0','#729cff']};
+        const info={
+          rush:{title:'Neon Rush',hint:'← → / A D switch lanes · ↑ / Space jump · Collect gold rings',controls:['left','jump','right']},
+          ruins:{title:'Ruins Runner',hint:'↑ / W / Space jump over fallen stones and gaps',controls:['jump']},
+          pulse:{title:'Pulse Jump',hint:'↑ / W / Space jump · Time each leap over the spikes',controls:['jump']},
+          crossing:{title:'Pixel Crossing',hint:'Arrow keys / WASD hop · Reach the far side without touching a car',controls:['left','up','down','right']},
+          slope:{title:'Vector Slope',hint:'Hold ← → / A D to steer · Avoid red blocks and stay on the track',controls:['left','right']}
+        };
+        const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+        const random=(a,b)=>a+Math.random()*(b-a);
+        const intersects=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+        function hud() {
+          $('#arcadeScore').textContent=String(Math.floor(state?.score||0)).padStart(4,'0');
+          $('#arcadeBest').textContent=String(Math.floor(best[state?.mode]||0)).padStart(4,'0');
+        }
+        function showOverlay(title,description,button) {
+          $('#arcadeOverlayTitle').textContent=title; $('#arcadeOverlayText').textContent=description;
+          $('#arcadeStart').textContent=button; overlay.hidden=false; $('#arcadePause').disabled=true;
+          $('#arcadeStart').focus();
+        }
+        function seedCars() {
+          state.cars=[];
+          for (const row of [1,2,3,5,6,8,9]) {
+            for (let i=0;i<2;i++) state.cars.push({row,x:180+i*340+random(-120,120),w:row%3===0?105:68,
+              dir:row%2?1:-1,speed:80+row*8+Math.min(state.round,8)*12,color:row%2?'#ff8c85':'#a6a0ff'});
+          }
+        }
+        function reset(mode,phase='ready') {
+          state={mode,phase,t:0,score:0,spawnIn:1.35,objects:[],lane:1,x:450,jump:0,vy:0,vx:0,
+            y:365,grounded:true,rotation:0,col:4,row:0,round:0,maxRow:0,cars:[],reason:''};
+          held.clear(); if(mode==='crossing') seedCars(); hud();
+        }
+        function stop() { cancelAnimationFrame(frameId); frameId=0; previousTime=0; held.clear(); state=null; }
+        function load(mode) {
+          stop(); reset(mode);
+          try { ctx=canvas.getContext('2d'); } catch (_) { ctx=null; }
+          const ratio=Math.min(window.devicePixelRatio||1,2);
+          canvas.width=W*ratio; canvas.height=H*ratio;
+          if(ctx) ctx.setTransform(ratio,0,0,ratio,0,0);
+          canvas.setAttribute('aria-label',info[mode].title+'. '+info[mode].hint);
+          $('#arcadeInstructions').textContent=info[mode].hint+' · P pause · R restart';
+          $$('[data-game-action]').forEach(button=>button.hidden=!info[mode].controls.includes(button.dataset.gameAction));
+          $('#arcadePause').textContent='Pause'; $('#arcadeRestart').disabled=!ctx;
+          $('#arcadeStart').disabled=!ctx;
+          if (!ctx) { showOverlay('Canvas unavailable','This browser could not start the game renderer. Try a current browser.','Unavailable'); return; }
+          draw(); showOverlay(info[mode].title,info[mode].hint,'Start game');
+          frameId=requestAnimationFrame(tick);
+        }
+        function start() {
+          if(!state||!ctx)return;
+          if(state.phase!=='paused') reset(state.mode,'running');
+          else state.phase='running';
+          held.clear(); previousTime=0; overlay.hidden=true;
+          $('#arcadePause').disabled=false; $('#arcadePause').textContent='Pause'; canvas.focus();
+        }
+        function pause() {
+          if(!state||state.phase!=='running')return;
+          state.phase='paused'; held.clear(); showOverlay('Take a breather','Your run is paused. Resume whenever you’re ready.','Resume game');
+        }
+        function lose(reason) {
+          if(state.phase!=='running')return;
+          state.phase='over'; state.reason=reason; held.clear();
+          best[state.mode]=Math.max(best[state.mode]||0,Math.floor(state.score)); hud();
+          showOverlay('One more run?',reason+' · Score '+Math.floor(state.score),'Play again');
+        }
+        function jump() {
+          if(state.mode==='rush') { if(state.jump===0)state.vy=570; }
+          else if(['ruins','pulse'].includes(state.mode)&&state.grounded) { state.vy=-650;state.grounded=false; }
+        }
+        function action(kind) {
+          if(!state||state.phase!=='running')return;
+          if(state.mode==='crossing') {
+            state.col=clamp(state.col+(kind==='right'?1:kind==='left'?-1:0),0,9);
+            state.row=clamp(state.row+(kind==='up'?1:kind==='down'?-1:0),0,10);
+            if(state.row>state.maxRow) { state.score+=(state.row-state.maxRow)*10;state.maxRow=state.row; }
+            if(state.row===10) { state.score+=100;state.round++;state.row=0;state.maxRow=0;seedCars(); }
+            checkCrossing(); hud();
+          } else if(kind==='jump'||kind==='up') jump();
+          else if(state.mode==='rush') state.lane=clamp(state.lane+(kind==='left'?-1:kind==='right'?1:0),0,2);
+        }
+        function updateRush(dt) {
+          state.x+=(450+(state.lane-1)*155-state.x)*Math.min(1,dt*15);
+          if(state.jump>0||state.vy>0) {state.vy-=1550*dt;state.jump=Math.max(0,state.jump+state.vy*dt);if(!state.jump)state.vy=0;}
+          const speed=240+Math.min(state.t*2.1,160);
+          state.spawnIn-=dt;
+          if(state.spawnIn<=0) {
+            const lane=Math.floor(random(0,3));state.objects.push({lane,y:-55,type:'barrier'});
+            state.objects.push({lane:(lane+1+Math.floor(random(0,2)))%3,y:-55,type:'coin'});
+            state.spawnIn=random(.95,1.3);
+          }
+          for(const o of state.objects) {
+            o.y+=speed*dt;
+            if(Math.abs(o.y-405)<36&&Math.abs(state.x-(450+(o.lane-1)*155))<47) {
+              if(o.type==='coin'&&!o.taken) {o.taken=true;state.score+=25;}
+              else if(o.type==='barrier'&&state.jump<55) {lose('You hit a barrier. Switch lanes or jump.');return;}
+            }
+          }
+          state.objects=state.objects.filter(o=>o.y<560&&!o.taken);state.score+=dt*10;
+        }
+        function updateJump(dt) {
+          const pulse=state.mode==='pulse', speed=(pulse?310:270)+Math.min(state.t*2,120);
+          state.spawnIn-=dt;
+          if(state.spawnIn<=0) {
+            const type=pulse?'spike':(Math.random()<.48?'gap':'stone');
+            const width=type==='gap'?random(95,135):pulse?random(42,78):random(40,65);
+            state.objects.push({x:960,w:width,h:pulse?48:random(38,62),type});state.spawnIn=random(1.25,1.8);
+          }
+          state.vy+=1650*dt; state.y+=state.vy*dt;
+          if(state.y>=365) {state.y=365;state.vy=0;state.grounded=true;state.rotation=Math.round(state.rotation/(Math.PI/2))*(Math.PI/2);}
+          if(!state.grounded)state.rotation+=dt*7;
+          for(const o of state.objects) {
+            o.x-=speed*dt;
+            if(o.type==='gap') {
+              if(180>o.x+6&&180<o.x+o.w-6&&state.y>=362) {lose('Watch your step. Jump across the gaps.');return;}
+            } else if(intersects({x:165,y:state.y-32,w:30,h:30},{x:o.x+7,y:365-o.h+8,w:o.w-14,h:o.h-8})) {
+              lose(pulse?'A spike caught you. Try jumping a little earlier.':'You hit a fallen stone. Time your next jump.');return;
+            }
+            if(!o.passed&&o.x+o.w<160){o.passed=true;state.score+=20;}
+          }
+          state.objects=state.objects.filter(o=>o.x+o.w>-50);state.score+=dt*8;
+        }
+        function checkCrossing() {
+          const px=196+state.col*52;
+          for(const c of state.cars)if(c.row===state.row&&px+17>c.x&&px-17<c.x+c.w){lose('Traffic got you. Wait for a clear lane.');return;}
+        }
+        function updateCrossing(dt) {
+          for(const c of state.cars) {
+            c.x+=c.dir*c.speed*dt;
+            if(c.dir>0&&c.x>790)c.x=90-c.w;
+            if(c.dir<0&&c.x+c.w<110)c.x=790;
+          }
+          checkCrossing();
+        }
+        const roadCenter=()=>450+Math.sin(state.t*.55)*85+Math.sin(state.t*.21)*35;
+        const ballRoadCenter=()=>450+(roadCenter()-450)*.8125;
+        function updateSlope(dt) {
+          const axis=(held.has('right')?1:0)-(held.has('left')?1:0);
+          state.vx+=(axis*390-state.vx)*Math.min(dt*9,1); state.x+=state.vx*dt;
+          if(Math.abs(state.x-ballRoadCenter())>189){lose('You rolled off the edge. Follow the bends.');return;}
+          state.spawnIn-=dt;
+          if(state.spawnIn<=0) {state.objects.push({z:0,lane:Math.floor(random(0,3))-1});state.spawnIn=random(1.15,1.6);}
+          for(const o of state.objects) {
+            o.z+=dt*(.28+Math.min(state.t*.0014,.13));
+            if(o.z>.94&&o.z<1.08&&Math.abs(state.x-(ballRoadCenter()+o.lane*145))<47){lose('You hit a red block. Steer through the open space.');return;}
+          }
+          state.objects=state.objects.filter(o=>o.z<1.14);state.score+=dt*15;
+        }
+        function update(dt) {
+          if(!state||state.phase!=='running')return;
+          // Bound simulation steps to avoid tunneling or jumps after a suspended tab.
+          dt=Math.min(Math.max(dt,0),1/30); state.t+=dt;
+          if(state.mode==='rush')updateRush(dt);
+          else if(state.mode==='ruins'||state.mode==='pulse')updateJump(dt);
+          else if(state.mode==='crossing')updateCrossing(dt);
+          else updateSlope(dt);
+          hud();
+        }
+        function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h);}
+        function line(x1,y1,x2,y2,color,width=1){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+        function circle(x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+        function poly(points,color){ctx.fillStyle=color;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();}
+        function label(text,x,y,size=12,color='#9ba9c4'){ctx.fillStyle=color;ctx.font=`600 ${size}px system-ui, sans-serif`;ctx.fillText(text,x,y);}
+        function backdrop() {
+          const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#11152b');g.addColorStop(1,'#070c16');rect(0,0,W,H,g);
+          for(let i=0;i<55;i++)circle((i*157+31)%900,(i*i*31)%290,i%4===0?1.5:.8,i%3===0?'#5f6a93':'#2d3855');
+          label('NEXUS ORIGINALS',28,34,11,'#9caacf');
+          ctx.textAlign='right';label(info[state.mode].title.toUpperCase(),872,34,11,palette[state.mode][0]);ctx.textAlign='left';
+        }
+        function drawRush() {
+          for(let i=0;i<10;i++) {const x=i*100;const h=80+(i*73)%120;rect(x,220-h,65,h,'#1c2540');for(let j=0;j<4;j++)rect(x+12,230-h+j*24,5,9,'#53517b');}
+          rect(202,65,496,435,'#121c30');
+          for(const x of [202,698])line(x,65,x,500,'#ff697b',3);
+          ctx.save();ctx.beginPath();ctx.rect(202,65,496,435);ctx.clip();
+          for(const x of [372.5,527.5])for(let y=-80;y<500;y+=85)rect(x,y+(state.t*240)%85,2,38,'#53617d');
+          for(const o of state.objects) {
+            const x=450+(o.lane-1)*155;
+            if(o.type==='coin') {circle(x,o.y,14,'#ffce67');circle(x,o.y,8,'#765024');}
+            else {rect(x-38,o.y-26,76,50,'#ff6578');rect(x-38,o.y-26,76,8,'#ffa993');for(let i=0;i<3;i++)poly([[x-34+i*25,o.y+15],[x-19+i*25,o.y+15],[x-4+i*25,o.y-10],[x-19+i*25,o.y-10]],'#6a2448');}
+          }
+          ctx.restore();
+          ctx.globalAlpha=.25;ctx.beginPath();ctx.ellipse(state.x,435,28,9,0,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();ctx.globalAlpha=1;
+          const y=405-state.jump;
+          rect(state.x-16,y-10,12,29,'#9c91ff');rect(state.x+4,y-10,12,29,'#9c91ff');
+          rect(state.x-22,y-40,44,35,'#6ce6f1');rect(state.x-16,y-61,32,27,'#ffd6ac');rect(state.x-18,y-65,36,11,'#ae96ff');
+          rect(state.x-10,y-54,20,7,'#272a4d');
+          label('DODGE · JUMP · COLLECT',314,479,12,'#a7b5d0');
+        }
+        function drawJump() {
+          const pulse=state.mode==='pulse',accent=palette[state.mode][0];
+          if(pulse) {
+            for(let x=0;x<960;x+=60)line(x-(state.t*45)%60,70,x-(state.t*45)%60,500,'#25233f');
+            for(let y=80;y<500;y+=60)line(0,y,900,y,'#25233f');
+            circle(690,145,62,'#302858');circle(690,145,48,'#1b1b37');
+          } else {
+            circle(725,120,40,'#e2c792');
+            for(let i=0;i<7;i++){const x=((i*173-state.t*25)%1150+1150)%1150-130;rect(x,180,48,185,'#1d393b');rect(x-8,170,64,17,'#2d4c46');rect(x+8,195,7,155,'#31544b');}
+            poly([[0,330],[160,270],[270,345],[440,285],[640,350],[800,260],[900,320],[900,400],[0,400]],'#102b2c');
+          }
+          rect(0,365,900,135,pulse?'#1c1736':'#1c3834');rect(0,365,900,5,pulse?'#9f8eff':'#7fbf91');
+          for(let x=-80;x<960;x+=80)line(x-(state.t*110)%80,390,x-(state.t*110)%80+35,500,pulse?'#3b2b61':'#2d5044',2);
+          for(const o of state.objects) {
+            if(o.type==='gap'){rect(o.x,365,o.w,135,'#060b13');line(o.x,367,o.x,480,'#7db48d',3);line(o.x+o.w,367,o.x+o.w,480,'#7db48d',3);}
+            else if(o.type==='spike') {const count=o.w>60?2:1;for(let i=0;i<count;i++){const x=o.x+i*o.w/count;poly([[x,365],[x+o.w/count/2,365-o.h],[x+o.w/count,365]],'#ff6e9f');poly([[x+7,360],[x+o.w/count/2,365-o.h+15],[x+o.w/count-7,360]],'#b32e70');}}
+            else {rect(o.x,365-o.h,o.w,o.h,'#8d9784');rect(o.x,365-o.h,o.w,8,'#c5c9a0');line(o.x+o.w*.6,365-o.h+8,o.x+o.w*.4,360,'#536f61',3);}
+          }
+          const y=state.y-19;
+          ctx.save();ctx.translate(180,y);if(pulse)ctx.rotate(state.rotation);
+          rect(-19,-19,38,38,accent);rect(-13,-13,26,26,pulse?'#5f46b1':'#6f6645');rect(-9,-6,6,7,'#eef8ff');rect(4,-6,6,7,'#eef8ff');rect(-7,6,14,4,'#eef8ff');ctx.restore();
+          label(pulse?'FIND YOUR TIMING. KEEP YOUR FLOW.':'THE RUINS GO ON. SO DO YOU.',28,462,12,accent);
+        }
+        function drawCrossing() {
+          rect(150,58,600,420,'#163b33');
+          for(let row=0;row<=10;row++) {
+            const y=450-row*36,road=[1,2,3,5,6,8,9].includes(row);
+            rect(150,y-18,600,36,road?'#222b3b':row===10?'#306357':'#245b47');
+            if(road)for(let x=155;x<750;x+=60)rect(x,y,23,2,'#5a6072');
+            else for(let x=165;x<735;x+=52)rect(x,y+10,12,3,'#3b8061');
+          }
+          for(const c of state.cars) {
+            const y=450-c.row*36;
+            ctx.save();ctx.beginPath();ctx.rect(150,65,600,405);ctx.clip();
+            rect(c.x,y-12,c.w,25,c.color);rect(c.x+12,y-9,17,18,'#293c5b');rect(c.x+c.w-25,y-9,13,18,'#293c5b');rect(c.x+7,y-15,13,5,'#080e1b');rect(c.x+c.w-20,y+11,13,5,'#080e1b');ctx.restore();
+          }
+          const x=196+state.col*52,y=450-state.row*36;
+          rect(x-14,y-13,28,26,'#fff0c5');rect(x-10,y-21,21,18,'#fdfcf5');rect(x+11,y-14,9,7,'#ffad69');rect(x+4,y-18,4,4,'#202437');rect(x-10,y+12,7,5,'#ffad69');rect(x+4,y+12,7,5,'#ffad69');
+          label('CROSSING '+(state.round+1),28,78,12,'#ffe18b');
+          label('TAKE YOUR TIME',28,96,9,'#849caa');
+          for(let i=0;i<10;i++)rect(183+i*52,82,26,5,i%2?'#fff0b3':'#66bc9c');
+        }
+        function drawSlope() {
+          const center=roadCenter(),horizon=100;
+          circle(450,115,59,'#293b5f');circle(450,115,46,'#15263e');
+          poly([[430,horizon],[470,horizon],[center+250,500],[center-250,500]],'#102e38');
+          for(const side of [-1,1])line(450+side*20,horizon,center+side*250,500,'#58efd0',3);
+          for(const side of [-.5,0,.5])line(450+side*40,horizon,center+side*500,500,'#21535c');
+          for(let i=0;i<15;i++) {
+            const z=((i/15+state.t*.25)%1),p=z*z,y=horizon+p*400,half=20+230*p,c=450+(center-450)*p;
+            line(c-half,y,c+half,y,'#2d6970',1.5);
+          }
+          for(const o of state.objects) {
+            const p=o.z*o.z,y=100+p*325,x=450+(center-450)*.8125*p+o.lane*145*p,size=58*p;
+            rect(x-size/2,y-size,size,size,'#ef547d');poly([[x-size/2,y-size],[x-size*.32,y-size*1.2],[x+size*.68,y-size*1.2],[x+size/2,y-size]],'#ff9c9c');
+          }
+          ctx.globalAlpha=.3;circle(state.x,440,23,'#000');ctx.globalAlpha=1;
+          const g=ctx.createRadialGradient(state.x-6,414,2,state.x,425,19);g.addColorStop(0,'#d5fff1');g.addColorStop(.4,'#66fbd9');g.addColorStop(1,'#159c97');circle(state.x,425,19,g);
+          line(state.x-8,435,state.x+8,414,'#258f94',2);
+          label('FOLLOW THE BENDS',28,468,12,'#66fbd9');
+        }
+        function draw() {
+          if(!ctx||!state)return;
+          ctx.clearRect(0,0,W,H);backdrop();
+          if(state.mode==='rush')drawRush();else if(state.mode==='ruins'||state.mode==='pulse')drawJump();
+          else if(state.mode==='crossing')drawCrossing();else drawSlope();
+        }
+        function tick(time) {
+          if(!state)return;
+          const dt=previousTime?Math.min((time-previousTime)/1000,1/30):0;previousTime=time;
+          if(state.phase==='running') {update(dt);draw();}
+          frameId=requestAnimationFrame(tick);
+        }
+        $('#arcadeStart').addEventListener('click',start);
+        $('#arcadePause').addEventListener('click',pause);
+        $('#arcadeRestart').addEventListener('click',()=>{if(state){reset(state.mode,'over');start();draw();}});
+        const keyMap={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'up',w:'up',W:'up',ArrowDown:'down',s:'down',S:'down',' ':'jump'};
+        window.addEventListener('keydown',event=>{
+          if(!state||event.altKey||event.ctrlKey||event.metaKey||event.isComposing)return;
+          const key=event.key;
+          if(key.toLowerCase()==='p'&&!event.repeat){event.preventDefault();if(state.phase==='paused')start();else pause();return;}
+          if(key.toLowerCase()==='r'&&!event.repeat){event.preventDefault();reset(state.mode,'over');start();return;}
+          const kind=keyMap[key];
+          // Preserve normal button keyboard activation while the intro/pause overlay is shown.
+          if(!kind||state.phase!=='running')return;
+          event.preventDefault();held.add(kind);
+          if(!event.repeat)action(kind==='up'&&state.mode!=='crossing'?'jump':kind);
+        });
+        window.addEventListener('keyup',event=>{const kind=keyMap[event.key];if(kind)held.delete(kind);});
+        $$('[data-game-action]').forEach(button=>{
+          const kind=button.dataset.gameAction;
+          // Pointer capture keeps held steering reliable if a finger leaves its button.
+          button.addEventListener('pointerdown',event=>{
+            if(state?.mode==='slope'){held.add(kind);button.setPointerCapture?.(event.pointerId);}
+          });
+          for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,()=>held.delete(kind));
+          button.addEventListener('click',()=>{action(kind);canvas.focus();});
+        });
+        window.addEventListener('blur',pause);
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+        // Engine lifecycle: a closed theater has no simulation, listeners are shared once.
+        return {load,stop};
+      }
+      const arcade=createArcade();
 
       // Browser navigation remembers only URLs typed into the address bar or bookmarks;
       // cross-origin iframe-internal navigation cannot reliably be observed by its parent.
