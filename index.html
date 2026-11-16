@@ -33,14 +33,14 @@
     .calculator-view.leaving { opacity: 0; transform: translateY(-16px) scale(.985); }
     .calculator-shell { width: min(100%, 392px); }
     .calc-eyebrow { color: #777780; font-size: 10px; letter-spacing: .24em; text-align: center; font-weight: 750; margin-bottom: 18px; }
-    .calculator { padding: 24px 21px 22px; border-radius: 28px; background: linear-gradient(155deg,#222225,#1b1b1e 70%); box-shadow: 0 26px 70px #0009, inset 0 1px 1px #ffffff0b; border: 1px solid rgba(255,255,255,.07); }
+    .calculator { padding: 24px 21px 22px; border-radius: 24px; background: linear-gradient(155deg,#222225,#1b1b1e 70%); box-shadow: 0 26px 70px #0009, inset 0 1px 1px #ffffff0b; border: 1px solid rgba(255,255,255,.07); }
     .calc-top { display: flex; justify-content: space-between; align-items: center; padding: 1px 8px; color: #85858e; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
     .calc-top .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #8d8d94; opacity: .75; }
     .calc-screen { min-height: 154px; padding: 35px 7px 23px; display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; overflow: hidden; }
     .calc-previous { font-size: 16px; color: #888891; height: 24px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .calc-current { color: #fff; width: 100%; text-align: right; font-size: clamp(38px, 10vw, 61px); line-height: 1.2; letter-spacing: -.055em; font-weight: 500; font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .calc-current { color: #fff; width: 100%; text-align: right; font-size: clamp(38px, 10vw, 61px); line-height: 1.2; letter-spacing: -.055em; font-weight: 600; font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     .calc-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 11px; }
-    .calc-key { appearance: none; border: none; aspect-ratio: 1; min-width: 0; border-radius: 999px; background: #333336; color: #fff; font-size: 27px; font-weight: 470; display: grid; place-items: center; transition: transform .11s ease, filter .16s, box-shadow .16s; -webkit-tap-highlight-color: transparent; user-select: none; }
+    .calc-key { appearance: none; border: none; aspect-ratio: 1; min-width: 0; border-radius: 999px; background: #2c2c2e; color: #fff; font-size: 27px; font-weight: 470; display: grid; place-items: center; transition: transform .11s ease, filter .16s, box-shadow .16s; -webkit-tap-highlight-color: transparent; user-select: none; }
     .calc-key:hover { filter: brightness(1.18); }
     .calc-key:active, .calc-key.pressed { transform: scale(.95); filter: brightness(1.28); }
     .calc-key.utility { background: #a5a5a5; color: #171719; font-size: 21px; font-weight: 600; }
@@ -285,6 +285,29 @@
     @media (prefers-reduced-motion:reduce) {
       *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
     }
+    .calc-launch { display:flex; align-items:center; justify-content:center; gap:7px; margin:16px auto 0; background:transparent; border:1px solid #ffffff12; border-radius:9px; padding:10px 13px; color:#96969f; font-size:11px; transition:background .2s; }
+    .calc-launch:hover { background:#ffffff09; color:white; }
+    .calc-launch .icon { width:13px; height:13px; }
+    .modal { max-height:calc(100dvh - 44px); overflow-y:auto; }
+    .game-title-row { flex-wrap:wrap; gap:8px; }
+    .theater-header { flex-wrap:wrap; }
+    .theater-actions { flex-wrap:wrap; }
+    .theater-footer { flex-wrap:wrap; flex-shrink:0; }
+    .theater-footer button { min-height:36px; }
+    .section-heading { flex-wrap:wrap; }
+    @media (max-width:460px) {
+      .games-grid { grid-template-columns:1fr; }
+      .browser-controls { flex-wrap:wrap; }
+      .url-wrap { flex-basis:calc(100% - 60px); order:2; }
+      .browser-controls .go-btn { order:3; }
+      .browser-controls .square-btn { flex-shrink:0; }
+    }
+    .game-launch-notice { height:100%; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:17px; padding:30px 22px; text-align:center; background:radial-gradient(ellipse at 50% 30%,#29234c,#0f1117 70%); }
+    .launch-symbol { width:100px; height:100px; flex-shrink:0; display:grid; place-items:center; font-size:60px; border-radius:24px; border:1px solid #ffffff30; box-shadow:0 18px 60px #0005; }
+    .game-launch-notice h2 { font-size:clamp(24px,4vw,36px); margin:0; letter-spacing:-.04em; }
+    .game-launch-notice p { max-width:430px; line-height:1.7; color:#aeb5cb; font-size:14px; margin:0; }
+    .game-launch-notice small { color:#979db4; font-size:11px; }
+    @media (max-height:600px) { .game-launch-notice { justify-content:flex-start; } .launch-symbol { width:60px; height:60px; font-size:35px; } }
   </style>
 </head>
 <body>
@@ -341,6 +364,7 @@
         </div>
       </div>
       <div class="calc-caption">Keyboard supported · Enter to calculate · Backspace to edit</div>
+      <button type="button" class="calc-launch" data-stealth><svg class="icon"><use href="#i-external"/></svg> Launch Stealth (about:blank)</button>
     </div>
   </section>
 
@@ -354,6 +378,7 @@
           <button type="button" class="nav-btn" data-page="settings"><svg class="icon"><use href="#i-settings"/></svg> Settings</button>
         </nav>
         <div class="top-actions">
+          <button data-stealth type="button" class="action-btn" title="Stealth (about:blank)" aria-label="Launch Stealth (about:blank)"><svg class="icon"><use href="#i-external"/></svg> Stealth (about:blank)</button>
           <button data-panic type="button" class="action-btn panic" title="Panic (Esc)"><svg class="icon"><use href="#i-power"/></svg> Panic (Esc)</button>
         </div>
       </div>
@@ -363,7 +388,7 @@
         <div class="hero">
           <div class="hero-content"><div class="hero-badge"><span class="sparkle">✦</span> YOUR DIGITAL PLAYGROUND</div>
             <h1>Good to see you.<br><span>What are we playing?</span></h1>
-            <p>Jump into a game, discover something new, or launch a web experience — all in one polished space.</p>
+            <p>Jump into a game, discover something new, or launch a web experience — all in one place.</p>
           </div>
           <div class="hero-stat" aria-hidden="true"><svg class="icon"><use href="#i-game"/></svg></div>
         </div>
@@ -376,7 +401,7 @@
             <button type="button" class="filter-pill" data-category="Apps" aria-pressed="false">Apps</button>
           </div>
         </div>
-        <div class="section-heading"><div><div class="eyebrow">EXPLORE THE COLLECTION</div><h2>Games & Apps</h2></div><div id="gameCount" class="subtle-count">6 experiences</div></div>
+        <div class="section-heading"><div><div class="eyebrow">EXPLORE THE COLLECTION</div><h2>Games & Apps</h2></div><div id="gameCount" class="subtle-count" role="status">6 experiences</div></div>
         <div id="gamesGrid" class="games-grid"></div>
         <div id="emptyGames" class="empty-results" hidden><strong>Nothing found</strong>Try another search or a different category.</div>
       </section>
@@ -393,24 +418,24 @@
             <button type="submit" class="go-btn">Go</button>
           </form>
           <div class="bookmarks"><span class="bookmarks-label">QUICK LINKS</span><button type="button" class="bookmark" data-link="https://duckduckgo.com">DuckDuckGo</button><button type="button" class="bookmark" data-link="https://www.wikipedia.org">Wikipedia</button><button type="button" class="bookmark" data-link="https://www.youtube.com">YouTube</button><button type="button" class="bookmark" data-link="https://www.roblox.com">Roblox</button></div>
-          <div class="browser-frame-holder"><iframe id="browserFrame" title="Embedded web browser" src="https://duckduckgo.com" allow="fullscreen; autoplay; gamepad" referrerpolicy="no-referrer"></iframe>
+          <div class="browser-frame-holder"><iframe id="browserFrame" title="Embedded web browser" src="about:blank" allow="fullscreen; autoplay; gamepad" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-downloads" referrerpolicy="no-referrer"></iframe>
             <div class="frame-hint"><span>Site not showing? Some sites block embedded views.</span><button id="browserOpenBlank" type="button">Open in about:blank</button><button id="browserOpenDirect" type="button">Direct ↗</button></div>
           </div>
         </div>
-        <p class="browser-tip">Browser restrictions are enforced by each website. A new window cannot bypass X-Frame-Options, Content-Security-Policy, or network filters. Back/Forward track addresses entered in this toolbar.</p>
+        <p class="browser-tip">Browser restrictions are enforced by each website. A new window cannot bypass X-Frame-Options, Content-Security-Policy, or network filters. Back/Forward track addresses entered in this toolbar. Escape and ~ work when this page has focus; use the Panic button when interacting with an embedded site.</p>
       </section>
 
       <section id="panel-settings" class="panel" aria-label="Settings" hidden>
         <div class="section-heading"><div><div class="eyebrow">MAKE IT YOURS</div><h2>Settings</h2><p>Personalize the window and manage your session.</p></div></div>
         <div class="settings-grid">
           <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-settings"/></svg></div><h3>Tab appearance</h3><p>Choose a preset browser-tab title and favicon for this window. Changes reset when the page reloads.</p><div class="settings-detail"><span>Current preset</span><strong id="currentPreset">Google Drive</strong></div><button id="openPresets" type="button" class="action-btn primary"><svg class="icon"><use href="#i-settings"/></svg> Customize tab appearance</button></article>
-          <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-external"/></svg></div><h3>Stealth launcher</h3><p>Open this page in an about:blank window, then navigate the original tab away. Your browser may block the pop-up or embedded page.</p><div class="settings-detail"><span>Launch mode</span><strong>New window</strong></div><button id="settingsStealth" type="button" class="action-btn primary"><svg class="icon"><use href="#i-external"/></svg> Launch Stealth (about:blank)</button></article>
+          <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-external"/></svg></div><h3>Stealth launcher</h3><p>Open this page in an about:blank window, then navigate the original tab away. Your browser may block the pop-up or embedded page.</p><div class="settings-detail"><span>Launch mode</span><strong>New window</strong></div><button data-stealth id="settingsStealth" type="button" class="action-btn primary"><svg class="icon"><use href="#i-external"/></svg> Launch Stealth (about:blank)</button></article>
           <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-game"/></svg></div><h3>Touch controls</h3><p>Use bigger tap targets and responsive press feedback for the calculator, navigation, game cards, and browser controls.</p><div class="settings-detail"><span>Large touch targets</span><strong id="touchModeStatus">Off</strong></div><button id="touchModeToggle" type="button" class="action-btn" aria-pressed="false"><svg class="icon"><use href="#i-check"/></svg> <span id="touchModeText">Enable touch mode</span></button></article>
           <article class="settings-card"><div class="settings-icon"><svg class="icon"><use href="#i-shield"/></svg></div><h3>Session controls</h3><p>Lock the dashboard and return to the calculator. Nothing about your unlocked session is saved between page loads.</p><div class="settings-detail"><span>Saved login state</span><strong>None</strong></div><button id="lockSession" type="button" class="action-btn"><svg class="icon"><use href="#i-lock"/></svg> Lock & return to calculator</button></article>
         </div>
-        <div class="security-notes"><strong>Browser note:</strong> This page does not use localStorage or sessionStorage. Browser and network administrators may still see page visits, DNS requests, or other traffic; changing a tab title or using about:blank does not guarantee privacy or erase records.</div>
+        <div class="security-notes"><strong>Browser note:</strong> This page does not use localStorage or sessionStorage. Browser and network administrators may still see page visits, DNS requests, or other traffic; changing a tab title or using about:blank does not erase records. The launcher replaces only the current session-history entry. Embedded sites may use their own storage. The calculator code is a view switch, not authentication.</div>
       </section>
-      <footer class="footer"><span>NEXUS / A lightweight, self-contained experience</span><span>Press Esc or ~ to navigate away · Built with vanilla HTML, CSS & JS</span></footer>
+      <footer class="footer"><span>NEXUS / A lightweight, self-contained experience</span><span>Press Esc or ~ to navigate away · Settings reset on reload</span></footer>
     </main>
   </div>
 
@@ -424,9 +449,18 @@
 
   <div id="theaterModal" class="modal-backdrop theater-backdrop" hidden>
     <div class="theater" role="dialog" aria-modal="true" aria-labelledby="theaterTitle">
-      <div class="theater-header"><div id="theaterTitle" class="theater-name">Game <span>FULLSCREEN VIEWER</span></div><div class="theater-actions"><button id="theaterBlank" type="button" class="action-btn"><svg class="icon"><use href="#i-external"/></svg> Open about:blank</button><button id="theaterClose" type="button" class="theater-close">Close Game ✕</button></div></div>
-      <div class="theater-content"><iframe id="theaterFrame" class="theater-frame" title="Game viewer" src="about:blank" allow="fullscreen; autoplay; gamepad" referrerpolicy="no-referrer"></iframe></div>
-      <div class="theater-footer"><span>If the game won't load, its host may prohibit iframe embedding.</span><button id="theaterDirect" type="button">Open on game website ↗</button></div>
+      <div class="theater-header"><div id="theaterTitle" class="theater-name">Game <span>FULLSCREEN VIEWER</span></div><div class="theater-actions"><button id="theaterBlank" type="button" class="action-btn" aria-label="Open game in about:blank"><svg class="icon"><use href="#i-external"/></svg> Open about:blank</button><button data-panic type="button" class="action-btn panic" aria-label="Panic (Esc)"><svg class="icon"><use href="#i-power"/></svg> Panic (Esc)</button><button id="theaterClose" type="button" class="theater-close">Close Game ✕</button></div></div>
+      <div class="theater-content">
+        <div id="gameLaunchNotice" class="game-launch-notice" hidden>
+          <div id="launchSymbol" class="launch-symbol" aria-hidden="true"></div>
+          <div class="eyebrow">PLAY ON THE GAME WEBSITE</div>
+          <h2 id="launchTitle"></h2>
+          <p>This provider opens games on its own website and blocks embedded players. Launch it in a new tab to play.</p>
+          <button id="launchGameDirect" type="button" class="action-btn primary">Launch game website ↗</button>
+          <small>about:blank cannot override the provider’s embedding policy.</small>
+        </div>
+        <iframe id="theaterFrame" class="theater-frame" title="Game viewer" src="about:blank" allow="fullscreen; autoplay; gamepad" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-downloads" referrerpolicy="no-referrer"></iframe></div>
+      <div class="theater-footer"><span>Not loading? The host may block embeds. Use the direct link. Keys cannot reach this page while a game has focus.</span><button id="theaterDirect" type="button">Open on game website ↗</button></div>
     </div>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -445,6 +479,8 @@
       let current = '0', firstOperand = null, operator = null, waitingForSecond = false;
       let previousExpression = '', justEvaluated = false, unlocked = false, activeCategory = 'All';
       let preset = 'drive', draftPreset = 'drive', activeGame = null, toastTimer;
+      let lastOperator = null, lastOperand = null, literalEntry = true, unlockTimer;
+      let modalReturnFocus = null, browserLoaded = false;
 
       const PRESETS = {
         drive: { name:'Google Drive', title:'My Drive - Google Drive', favicon:'https://drive.google.com/favicon.ico', glyph:'▲', note:'Cloud file manager' },
@@ -453,11 +489,11 @@
         canvas: { name:'Canvas', title:'Dashboard', favicon:'https://canvas.instructure.com/favicon.ico', glyph:'◈', note:'Learning dashboard' }
       };
       const GAMES = [
-        { id:'roblox', title:'Roblox', category:'Apps', subtitle:'Discover countless community experiences.', url:'https://www.roblox.com', symbol:'◈', gradient:'linear-gradient(145deg,#34354d,#151822 80%)', artLabel:'CREATE • PLAY' },
-        { id:'subway', title:'Subway Surfers', category:'Action', subtitle:'Dash, dodge and outrun the inspector.', url:'https://poki.com/en/g/subway-surfers', symbol:'⚡', gradient:'linear-gradient(125deg,#ff953b,#dd4e74 73%,#582887)', artLabel:'ENDLESS RUNNER' },
-        { id:'temple', title:'Temple Run 2', category:'Action', subtitle:'Navigate perilous paths and ancient ruins.', url:'https://poki.com/en/g/temple-run-2', symbol:'◆', gradient:'linear-gradient(125deg,#3f9d7c,#1b655d 58%,#143b52)', artLabel:'ESCAPE THE RUINS' },
-        { id:'geometry', title:'Geometry Dash', category:'Arcade', subtitle:'Time your jumps in a neon rhythm world.', url:'https://poki.com/en/g/geometry-dash', symbol:'▣', gradient:'linear-gradient(125deg,#9565ef,#5c48ce 68%,#2e347c)', artLabel:'RHYTHM & TIMING' },
-        { id:'crossy', title:'Crossy Road', category:'Arcade', subtitle:'One more hop. One more impossible crossing.', url:'https://poki.com/en/g/crossy-road', symbol:'✦', gradient:'linear-gradient(135deg,#ffbf66,#fa7e5d 62%,#cc436f)', artLabel:'HOP TO IT' },
+        { id:'roblox', launchOnly:true, title:'Roblox', category:'Apps', subtitle:'Discover countless community experiences.', url:'https://www.roblox.com', symbol:'◈', gradient:'linear-gradient(145deg,#34354d,#151822 80%)', artLabel:'CREATE • PLAY' },
+        { id:'subway', launchOnly:true, title:'Subway Surfers', category:'Action', subtitle:'Dash, dodge and outrun the inspector.', url:'https://poki.com/en/g/subway-surfers', symbol:'⚡', gradient:'linear-gradient(125deg,#ff953b,#dd4e74 73%,#582887)', artLabel:'ENDLESS RUNNER' },
+        { id:'temple', launchOnly:true, title:'Temple Run 2', category:'Action', subtitle:'Navigate perilous paths and ancient ruins.', url:'https://poki.com/en/g/temple-run-2', symbol:'◆', gradient:'linear-gradient(125deg,#3f9d7c,#1b655d 58%,#143b52)', artLabel:'ESCAPE THE RUINS' },
+        { id:'geometry', launchOnly:true, title:'Geometry Dash', category:'Arcade', subtitle:'Time your jumps in a neon rhythm world.', url:'https://poki.com/en/g/geometry-dash', symbol:'▣', gradient:'linear-gradient(125deg,#9565ef,#5c48ce 68%,#2e347c)', artLabel:'RHYTHM & TIMING' },
+        { id:'crossy', launchOnly:true, title:'Crossy Road', category:'Arcade', subtitle:'One more hop. One more impossible crossing.', url:'https://poki.com/en/g/crossy-road', symbol:'✦', gradient:'linear-gradient(135deg,#ffbf66,#fa7e5d 62%,#cc436f)', artLabel:'HOP TO IT' },
         { id:'slope', title:'Slope', category:'Arcade', subtitle:'Stay on the track as the speed ramps up.', url:'https://slopegame.com/', symbol:'●', gradient:'linear-gradient(125deg,#11b8b4,#136d95 62%,#302b83)', artLabel:'3D SPEED RUN' }
       ];
 
@@ -466,115 +502,160 @@
         clearTimeout(toastTimer); toastTimer = setTimeout(() => node.classList.remove('visible'), 3400);
       }
       function displayNumber(value) {
-        if (value === 'Error') return 'Error';
+        if (value === 'Error' || /e/i.test(value)) return value;
         const [int, fraction] = String(value).split('.');
         const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         return fraction !== undefined ? `${formatted}.${fraction}` : formatted;
       }
       function updateCalc() {
-        currentEl.textContent = displayNumber(current);
+        const display = displayNumber(current);
+        currentEl.textContent = display;
         previousEl.textContent = previousExpression || '\u00a0';
-        $$('.calc-key.operator').forEach((btn) => btn.classList.toggle('selected', btn.dataset.key === operator && waitingForSecond));
-        const len = displayNumber(current).length;
-        currentEl.style.fontSize = len > 14 ? '33px' : len > 10 ? '44px' : '';
+        $$('.calc-key.operator').forEach(btn => btn.classList.toggle('selected', btn.dataset.key === operator && waitingForSecond));
+        // Keep the whole number readable at small widths, including scientific notation.
+        currentEl.style.fontSize = display.length > 14 ? '25px' : display.length > 10 ? '34px' : '';
       }
-      function resetCalc() { current='0'; firstOperand=null; operator=null; waitingForSecond=false; previousExpression=''; justEvaluated=false; updateCalc(); }
+      function resetCalc() {
+        current='0'; firstOperand=null; operator=null; waitingForSecond=false;
+        previousExpression=''; justEvaluated=false; lastOperator=null; lastOperand=null; literalEntry=true;
+        updateCalc();
+      }
       function enterDigit(value) {
         if (current === 'Error') resetCalc();
         if (waitingForSecond || justEvaluated) {
           current = value === '.' ? '0.' : value;
-          waitingForSecond = false; justEvaluated = false;
-          if (!operator) previousExpression = '';
+          waitingForSecond=false; justEvaluated=false; literalEntry=!operator;
+          lastOperator=null; lastOperand=null;
+          if (!operator) previousExpression='';
         } else if (value === '.') {
-          if (!current.includes('.')) current += '.';
+          if (!current.includes('.') && !/e/i.test(current)) current+='.';
         } else if (current.replace(/[-.]/g,'').length < 15) {
-          current = current === '0' ? value : current === '-0' ? '-' + value : current + value;
+          current=current==='0' ? value : current==='-0' ? '-'+value : current+value;
         }
         updateCalc();
       }
       function calculate(a, b, op) {
-        let result;
-        if (op === '+') result = a+b;
-        else if (op === '-') result = a-b;
-        else if (op === '*') result = a*b;
-        else if (op === '/') result = b === 0 ? NaN : a/b;
-        else return b;
+        const result = op==='+' ? a+b : op==='-' ? a-b : op==='*' ? a*b : op==='/' ? (b===0 ? NaN : a/b) : b;
         return Number.isFinite(result) ? Number(result.toPrecision(12)) : NaN;
       }
       function pressOperator(nextOp) {
-        if (current === 'Error') return;
-        const input = Number(current);
-        if (operator && !waitingForSecond && firstOperand !== null) {
-          const result = calculate(firstOperand, input, operator);
-          if (!Number.isFinite(result)) { current='Error'; firstOperand=null; operator=null; previousExpression='Cannot divide by zero'; updateCalc(); return; }
-          current = String(result); firstOperand = result;
-        } else if (firstOperand === null || justEvaluated) firstOperand = input;
-        operator = nextOp; waitingForSecond = true; justEvaluated = false;
-        previousExpression = `${displayNumber(String(firstOperand))} ${symbols[operator]}`;
+        if (current==='Error') return;
+        if (operator && !waitingForSecond) {
+          const answer=calculate(firstOperand, Number(current), operator);
+          if (!Number.isFinite(answer)) {
+            resetCalc(); current='Error'; previousExpression='Result is undefined'; updateCalc(); return;
+          }
+          current=String(answer);
+        }
+        firstOperand=Number(current); operator=nextOp; waitingForSecond=true;
+        justEvaluated=false; literalEntry=false; lastOperator=null; lastOperand=null;
+        previousExpression=`${displayNumber(current)} ${symbols[operator]}`;
         updateCalc();
       }
       function unlockDashboard() {
         if (unlocked) return;
-        unlocked = true;
-        calculatorView.classList.add('leaving');
-        setTimeout(() => {
-          calculatorView.hidden = true;
-          dashboardView.hidden = false;
-          switchPage('games');
-          window.scrollTo(0,0);
-        }, 290);
+        unlocked=true; calculatorView.classList.add('leaving');
+        unlockTimer=setTimeout(() => {
+          calculatorView.hidden=true; dashboardView.hidden=false;
+          switchPage('games'); $('.nav-btn').focus(); window.scrollTo(0,0);
+        }, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 290);
       }
       function equals() {
-        if (current === '1313' && operator === null && firstOperand === null) { unlockDashboard(); return; }
-        if (!operator || waitingForSecond || firstOperand === null || current === 'Error') return;
-        const second = Number(current), answer = calculate(firstOperand, second, operator);
-        previousExpression = `${displayNumber(String(firstOperand))} ${symbols[operator]} ${displayNumber(current)} =`;
-        current = Number.isFinite(answer) ? String(answer) : 'Error';
-        operator = null; firstOperand = null; waitingForSecond = false; justEvaluated = true; updateCalc();
+        if (current==='1313' && !operator && literalEntry && !justEvaluated) { unlockDashboard(); return; }
+        if (current==='Error') return;
+        const op=operator || lastOperator;
+        if (!op) { justEvaluated=true; literalEntry=false; return; }
+        const a=operator ? firstOperand : Number(current);
+        const b=operator ? Number(current) : lastOperand;
+        const answer=calculate(a,b,op);
+        previousExpression=`${displayNumber(String(a))} ${symbols[op]} ${displayNumber(String(b))} =`;
+        current=Number.isFinite(answer) ? String(answer) : 'Error';
+        lastOperator=op; lastOperand=b; operator=null; firstOperand=null;
+        waitingForSecond=false; justEvaluated=true; literalEntry=false; updateCalc();
       }
       function backspace() {
-        if (current === 'Error') { resetCalc(); return; }
-        if (waitingForSecond || justEvaluated) { current='0'; waitingForSecond=false; justEvaluated=false; if (!operator) previousExpression=''; }
-        else { current = current.length <= 1 || (current.length===2 && current[0]==='-') ? '0' : current.slice(0,-1); }
+        if (current==='Error' || justEvaluated || /e/i.test(current)) { resetCalc(); return; }
+        if (waitingForSecond) { current='0'; waitingForSecond=false; }
+        else current=current.length<=1 || (current.length===2 && current[0]==='-') ? '0' : current.slice(0,-1);
         updateCalc();
       }
       function calcKey(key) {
+        if (unlocked) return;
         if (/^[0-9.]$/.test(key)) enterDigit(key);
         else if (key==='AC') resetCalc();
-        else if (key==='sign') { if (current!=='0' && current!=='Error') current = current.startsWith('-') ? current.slice(1) : '-'+current; updateCalc(); }
-        else if (key==='percent') { if (current!=='Error') current=String(Number((Number(current)/100).toPrecision(12))); updateCalc(); }
-        else if ('+-*/'.includes(key)) pressOperator(key);
+        else if (key==='sign' || key==='percent') {
+          if (current==='Error') return;
+          if (key==='sign' && waitingForSecond) current='0';
+          if (key==='sign') current=current.startsWith('-') ? current.slice(1) : '-'+current;
+          else {
+            const fraction=Number(current)/100;
+            const value=operator && ['+','-'].includes(operator) ? firstOperand*fraction : fraction;
+            current=Number.isFinite(value) ? String(Number(value.toPrecision(12))) : 'Error';
+          }
+          waitingForSecond=false; literalEntry=false;
+          if (justEvaluated) { lastOperator=null; lastOperand=null; previousExpression=''; }
+          updateCalc();
+        } else if (['+','-','*','/'].includes(key)) pressOperator(key);
         else if (key==='=') equals();
         else if (key==='Backspace') backspace();
       }
       $('#calcGrid').addEventListener('click', (event) => { const btn=event.target.closest('[data-key]'); if (!btn) return; calcKey(btn.dataset.key); });
 
       // Quick exit is intentionally global and takes priority over modal/keyboard handling.
-      function panic() { window.location.replace('https://google.com'); }
+      function shellWindow() {
+        try { if (window.parent!==window && window.parent.__nexusShell) return window.parent; } catch (_) { /* unrelated frame */ }
+        return window;
+      }
+      function panic() { shellWindow().location.replace('https://google.com'); }
       $$('[data-panic]').forEach(btn => btn.addEventListener('click', panic));
       window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' || event.key === '~') { event.preventDefault(); panic(); return; }
-        if (!dashboardView.hidden || event.ctrlKey || event.altKey || event.metaKey) return;
+        if (!dashboardView.hidden || event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
         const tag = (event.target.tagName || '').toLowerCase();
         if (tag === 'input' || tag === 'textarea' || event.target.isContentEditable) return;
         let key = event.key;
+        if (key === 'Enter' && event.target.closest?.('[data-stealth]')) return;
         if (key === 'Enter') key='=';
+        if (key === '%') key='percent';
         if (key === 'x' || key === 'X') key='*';
         if (key === 'Delete' || key.toLowerCase() === 'c') key='AC';
-        if (/^[0-9.]$/.test(key) || ['+','-','*','/','=','Backspace','AC'].includes(key)) {
+        if (/^[0-9.]$/.test(key) || ['+','-','*','/','=','Backspace','AC','percent'].includes(key)) {
           event.preventDefault(); calcKey(key);
           const clicked = $$('.calc-key').find(btn=>btn.dataset.key===key);
           if (clicked) { clicked.classList.add('pressed'); setTimeout(()=>clicked.classList.remove('pressed'),100); }
         }
-      });
+      }, true);
 
       function applyPreset(name) {
         const option=PRESETS[name]; if (!option) return;
         preset = name; document.title = option.title;
         const link=$('#tabFavicon'); link.href=option.favicon;
         $('#currentPreset').textContent=option.name;
+        const shell=shellWindow();
+        if (shell!==window) { shell.document.title=option.title; shell.document.querySelector('link[rel=icon]').href=option.favicon; }
       }
-      function closePresets() { $('#presetModal').hidden=true; }
+      function showModal(id, focusTarget, returnFocus=document.activeElement) {
+        modalReturnFocus=returnFocus;
+        $(id).hidden=false; dashboardView.inert=true;
+        document.body.style.overflow='hidden'; $(focusTarget).focus();
+      }
+      function hideModal(id) {
+        if ($(id).hidden) return;
+        $(id).hidden=true; dashboardView.inert=false; document.body.style.overflow='';
+        if (modalReturnFocus?.isConnected) modalReturnFocus.focus();
+        modalReturnFocus=null;
+      }
+      function closePresets() { hideModal('#presetModal'); }
+      // The modal background is inert; also wrap keyboard focus at the dialog edges.
+      document.addEventListener('keydown', event => {
+        if (event.key!=='Tab') return;
+        const modal=$$('.modal-backdrop').find(node=>!node.hidden);
+        if (!modal) return;
+        const targets=[...modal.querySelectorAll('button:not(:disabled), iframe, [tabindex="0"]')];
+        const first=targets[0], last=targets[targets.length-1];
+        if (event.shiftKey && document.activeElement===first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement===last) { event.preventDefault(); first.focus(); }
+      });
       function renderPresets() {
         $('#presetList').innerHTML = Object.entries(PRESETS).map(([key, value]) => `
           <button type="button" class="preset-option ${key===draftPreset?'selected':''}" data-preset="${key}" aria-pressed="${key===draftPreset}">
@@ -582,43 +663,58 @@
             ${key===draftPreset?'<svg class="icon preset-check"><use href="#i-check"/></svg>':''}
           </button>`).join('');
       }
-      $('#openPresets').addEventListener('click',()=>{ draftPreset=preset; renderPresets(); $('#presetModal').hidden=false; });
-      $('#presetList').addEventListener('click',event=>{ const button=event.target.closest('[data-preset]'); if (!button) return; draftPreset=button.dataset.preset; renderPresets(); });
+      $('#openPresets').addEventListener('click',()=>{ draftPreset=preset; renderPresets(); showModal('#presetModal','#closePresets',$('#openPresets')); });
+      $('#presetList').addEventListener('click',event=>{ const button=event.target.closest('[data-preset]'); if (!button) return; draftPreset=button.dataset.preset; renderPresets(); $(`[data-preset="${draftPreset}"]`).focus(); });
       $('#savePresets').addEventListener('click',()=>{ applyPreset(draftPreset); closePresets(); toast(`${PRESETS[preset].name} appearance applied for this session.`); });
       $('#closePresets').addEventListener('click',closePresets);
       $('#cancelPresets').addEventListener('click',closePresets);
       $('#presetModal').addEventListener('click',(event)=>{ if (event.target.id==='presetModal') closePresets(); });
 
       function openFramedWindow(targetUrl, shouldReplaceOriginal=false) {
-        // Browser policies may disallow popups or the destination's frame embedding.
-        const win=window.open('about:blank','_blank');
+        const win=window.open('about:blank', '_blank');
         if (!win) { toast('Pop-up blocked. Allow pop-ups for this website and try again.'); return false; }
         try {
           const doc=win.document;
-          doc.title=PRESETS.drive.title;
+          doc.title=PRESETS.drive.title; doc.documentElement.lang='en';
           const favicon=doc.createElement('link'); favicon.rel='icon'; favicon.href=PRESETS.drive.favicon;
           doc.head.appendChild(favicon);
-          const viewport=doc.createElement('meta'); viewport.name='viewport';viewport.content='width=device-width, initial-scale=1';doc.head.appendChild(viewport);
-          doc.documentElement.style.cssText='margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#101218';
-          doc.body.style.cssText='margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#101218';
+          const viewport=doc.createElement('meta'); viewport.name='viewport'; viewport.content='width=device-width, initial-scale=1'; doc.head.appendChild(viewport);
+          doc.documentElement.style.cssText='margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#121212';
+          doc.body.style.cssText='margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#121212';
+          win.__nexusShell=true;
           const frame=doc.createElement('iframe'); frame.src=targetUrl;
-          frame.title='Content'; frame.style.cssText='display:block;width:100vw;height:100vh;border:none;';
+          frame.title=shouldReplaceOriginal ? 'Calculator' : 'External website';
+          frame.style.cssText='display:block;width:100vw;height:100vh;border:none;';
           frame.setAttribute('allow','fullscreen; autoplay; gamepad');
           frame.setAttribute('referrerpolicy','no-referrer');
-          doc.body.appendChild(frame);
-          try { win.opener=null; } catch (_) { /* optional browser hardening */ }
-          if (shouldReplaceOriginal) window.location.replace('https://google.com');
-          return true;
-        } catch (error) {
-          try { win.close(); } catch (_) { /* no-op */ }
-          toast('Could not create the new window in this browser.');
-          return false;
+          if (!shouldReplaceOriginal) {
+            frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-downloads');
+            // A blank wrapper cannot bypass frame policies. Always offer a direct destination.
+            const bar=doc.createElement('div');
+            bar.style.cssText='position:fixed;bottom:12px;left:12px;right:12px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;padding:10px;background:#181b27f5;border:1px solid #ffffff33;border-radius:12px;color:#eee;font:12px system-ui';
+            bar.append('Not loading? This site may block embedded views.');
+            const direct=doc.createElement('a'); direct.textContent='Open website directly ↗'; direct.href=targetUrl;
+            direct.rel='noreferrer'; direct.style.cssText='color:#beb6ff;padding:8px'; bar.appendChild(direct);
+            const exit=doc.createElement('button'); exit.textContent='Panic';
+            exit.style.cssText='background:#59232d;color:white;border:0;border-radius:7px;padding:8px 12px;cursor:pointer';
+            exit.onclick=()=>win.location.replace('https://google.com'); bar.appendChild(exit); doc.body.appendChild(bar);
+          }
+          doc.body.prepend(frame);
+          win.addEventListener('keydown',event=>{
+            if (event.key==='Escape' || event.key==='~') { event.preventDefault(); win.location.replace('https://google.com'); }
+          },true);
+          win.opener=null;
+        } catch (_) {
+          win.close(); toast('Could not create the new window in this browser.'); return false;
         }
+        if (shouldReplaceOriginal) shellWindow().location.replace('https://google.com');
+        return true;
       }
       function launchStealth() { openFramedWindow(window.location.href, true); }
-      $('#settingsStealth').addEventListener('click',launchStealth);
+      $$('[data-stealth]').forEach(button=>button.addEventListener('click',launchStealth));
 
       function switchPage(page) {
+        if (page==='browser' && !browserLoaded) { browserLoaded=true; browserNavigate(browserHistory[browserIndex],false); }
         $$('.nav-btn').forEach(btn => {
           const active=btn.dataset.page===page;btn.classList.toggle('active',active);
           if (active) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
@@ -628,8 +724,10 @@
       $$('.nav-btn').forEach(btn => btn.addEventListener('click',()=>switchPage(btn.dataset.page)));
       $('#lockSession').addEventListener('click',()=>{
         closePresets(); closeTheater(); resetCalc(); applyPreset('drive');
-        unlocked=false; dashboardView.hidden=true; calculatorView.hidden=false;
-        calculatorView.classList.remove('leaving'); window.scrollTo(0,0);
+        clearTimeout(unlockTimer); resetBrowser(); $('#gameSearch').value=''; activeCategory='All';
+        $$('.filter-pill').forEach(pill=>{ const active=pill.dataset.category==='All'; pill.classList.toggle('selected',active); pill.setAttribute('aria-pressed',String(active)); });
+        renderGames(); unlocked=false; dashboardView.hidden=true; calculatorView.hidden=false;
+        calculatorView.classList.remove('leaving'); window.scrollTo(0,0); $('[data-key="AC"]').focus();
       });
 
       function renderGames() {
@@ -641,7 +739,7 @@
             <div class="game-art" style="--art:${game.gradient}"><span class="game-symbol" aria-hidden="true">${game.symbol}</span><span class="art-sub">${game.artLabel}</span></div>
             <div class="game-info"><div class="game-title-row"><h3 class="game-title">${game.title}</h3><span class="game-category">${game.category}</span></div>
             <p class="game-description">${game.subtitle}</p>
-            <button type="button" class="play-btn" data-play="${game.id}"><svg class="icon"><use href="#i-play"/></svg> Play Now <svg class="icon"><use href="#i-arrow"/></svg></button>
+            <button type="button" class="play-btn" data-play="${game.id}" aria-label="Play ${game.title}"><svg class="icon"><use href="#i-play"/></svg> Play Now <svg class="icon"><use href="#i-arrow"/></svg></button>
             </div>
           </article>`).join('');
         $('#gameCount').textContent=`${filtered.length} ${filtered.length===1?'experience':'experiences'}`;
@@ -655,39 +753,47 @@
       }));
       $('#gamesGrid').addEventListener('click',event=>{
         const btn=event.target.closest('[data-play]');if (!btn) return;
-        const game=GAMES.find(item=>item.id===btn.dataset.play);if (game) openTheater(game);
+        const game=GAMES.find(item=>item.id===btn.dataset.play);if (game) openTheater(game,btn);
       });
-      function openTheater(game) {
+      function openTheater(game,trigger) {
         activeGame=game;
         $('#theaterTitle').innerHTML=`${game.title} <span>FULLSCREEN VIEWER</span>`;
-        $('#theaterFrame').src=game.url;
-        $('#theaterModal').hidden=false;
-        document.body.style.overflow='hidden';
+        $('#theaterFrame').hidden=!!game.launchOnly;
+        $('#theaterFrame').src=game.launchOnly ? 'about:blank' : game.url;
+        $('#gameLaunchNotice').hidden=!game.launchOnly;
+        $('#launchTitle').textContent=game.title; $('#launchSymbol').textContent=game.symbol;
+        $('#launchSymbol').style.background=game.gradient;
+        $('#theaterFrame').title=game.title;
+        showModal('#theaterModal','#theaterClose',trigger);
       }
       function closeTheater() {
-        $('#theaterModal').hidden=true;
+        hideModal('#theaterModal');
         $('#theaterFrame').src='about:blank';
         activeGame=null; document.body.style.overflow='';
       }
       $('#theaterClose').addEventListener('click',closeTheater);
       $('#theaterBlank').addEventListener('click',()=>{ if (activeGame) openFramedWindow(activeGame.url); });
-      $('#theaterDirect').addEventListener('click',()=>{ if (activeGame) window.open(activeGame.url,'_blank','noopener,noreferrer'); });
+      function openGameDirect() { if (activeGame) window.open(activeGame.url,'_blank','noopener,noreferrer'); }
+      $('#theaterDirect').addEventListener('click',openGameDirect);
+      $('#launchGameDirect').addEventListener('click',openGameDirect);
 
       // Browser navigation remembers only URLs typed into the address bar or bookmarks;
       // cross-origin iframe-internal navigation cannot reliably be observed by its parent.
       let browserHistory=['https://duckduckgo.com'];let browserIndex=0;
       function normalizeAddress(value) {
         const trimmed=value.trim(); if (!trimmed) return null;
+        if (/^[a-z][a-z\d+.-]*:/i.test(trimmed) && !/^https?:\/\//i.test(trimmed)) return null;
         let raw;
         if (/^https?:\/\//i.test(trimmed)) raw=trimmed;
         else if (/^(localhost|[a-z\d-]+(\.[a-z\d-]+)+)(:\d+)?([/?#].*)?$/i.test(trimmed)) raw='https://'+trimmed;
         else raw='https://duckduckgo.com/?q='+encodeURIComponent(trimmed);
-        try { const url=new URL(raw);return ['https:','http:'].includes(url.protocol)?url.href:null; } catch (_) { return null; }
+        try { const url=new URL(raw);return ['https:','http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null; } catch (_) { return null; }
       }
       function browserNavigate(address,addHistory=true) {
         if (!address) { toast('Enter a valid URL or search query.');return; }
         $('#browserFrame').src=address;$('#browserUrl').value=address;
-        if (addHistory) { browserHistory=browserHistory.slice(0,browserIndex+1);browserHistory.push(address);browserIndex++; }
+        browserLoaded=true;
+        if (addHistory && address!==browserHistory[browserIndex]) { browserHistory=browserHistory.slice(0,browserIndex+1);browserHistory.push(address);browserIndex++; }
         $('#browserBack').disabled=browserIndex===0;
         $('#browserForward').disabled=browserIndex>=browserHistory.length-1;
       }
@@ -699,6 +805,21 @@
       $('#browserOpenBlank').addEventListener('click',()=>openFramedWindow(browserHistory[browserIndex]));
       $('#browserOpenDirect').addEventListener('click',()=>window.open(browserHistory[browserIndex],'_blank','noopener,noreferrer'));
 
+
+      function resetBrowser() {
+        browserLoaded=false; browserHistory=['https://duckduckgo.com']; browserIndex=0;
+        $('#browserFrame').src='about:blank'; $('#browserUrl').value=browserHistory[0];
+        $('#browserBack').disabled=true; $('#browserForward').disabled=true;
+      }
+      // Back-forward cache must never restore the unlocked view.
+      window.addEventListener('pagehide',()=>{
+        clearTimeout(unlockTimer); closePresets(); closeTheater(); resetBrowser(); resetCalc();
+        unlocked=false; dashboardView.hidden=true; calculatorView.hidden=false;
+        calculatorView.classList.remove('leaving'); applyPreset('drive');
+        $('#gameSearch').value=''; activeCategory='All';
+        $$('.filter-pill').forEach(pill=>{ const active=pill.dataset.category==='All'; pill.classList.toggle('selected',active); pill.setAttribute('aria-pressed',String(active)); });
+        renderGames();
+      });
 
       // Browser click events are fired on taps as well as mouse clicks. Pointer
       // handlers add instant tactile feedback without double-invoking actions.
