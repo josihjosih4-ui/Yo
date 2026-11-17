@@ -416,7 +416,7 @@ local function numberSetting(parent,title,y,key,step,lo,hi,suffix)
         Enum.Font.GothamBold,14,colors.text)
     local function adjust(delta)
         config[key]=math.clamp(config[key]+delta,lo,hi)
-        val.Text=tostring(math.floor(config[key]+.5))..suffix
+        val.Text=(key=="smooth" and string.format("%.2f",config[key]) or tostring(math.floor(config[key]+.5)))..suffix
     end
     local minus=corner(ui("TextButton",frame,{
         Position=UDim2.new(1,-93,0,23),Size=UDim2.fromOffset(38,29),
@@ -511,7 +511,7 @@ local function resetRemovedVisuals()
         end
     end
 end
-local function visible(cam,target)
+local function visible(cam,target,model)
     if not config.visibility then return true end
     local cameraPos=cam.CFrame.Position
     local ray=target-cameraPos
@@ -526,7 +526,7 @@ local function visible(cam,target)
     params.FilterDescendantsInstances=ignore
     local hit=Workspace:Raycast(cameraPos,ray,params)
     return hit==nil or hit.Instance==nil or
-        (state.target and hit.Instance:IsDescendantOf(state.target.model))
+        (model and hit.Instance:IsDescendantOf(model))
 end
 local function predicted(data,from)
     local root=data.root
@@ -552,7 +552,7 @@ local function updateTarget()
                 local screen,onscreen=cam:WorldToViewportPoint(point)
                 local dist=(Vector2.new(screen.X,screen.Y)-center).Magnitude
                 if onscreen and dist<smallest and
-                    (not config.visibility or visible(cam,point)) then
+                    (not config.visibility or visible(cam,point,data.model)) then
                     best=data
                     smallest=dist
                 end
@@ -643,16 +643,21 @@ wire(LP:GetPropertyChangedSignal("Team"),function()
     cleanupCache()
     rebuildTargets()
 end)
-wire(close.Activated,function()
+local renderName="AETHER_AIM_"..tostring(LP.UserId)
+local function shutdown()
     if not state.alive then return end
     state.alive=false
     config.silent=false;config.aimLock=false;config.esp=false
-    for _,c in ipairs(state.connections) do pcall(function()c:Disconnect()end)end
+    pcall(function()RunService:UnbindFromRenderStep(renderName)end)
+    for _,c in ipairs(state.connections)do pcall(function()c:Disconnect()end)end
     cleanupCache()
     pcall(function()gui:Destroy()end)
     pcall(function()over:Destroy()end)
-    if G.AETHER_TINY_SKIES_CLOSE then G.AETHER_TINY_SKIES_CLOSE=nil end
-end)
+    if G.AETHER_TINY_SKIES_CLOSE==shutdown then
+        G.AETHER_TINY_SKIES_CLOSE=nil
+    end
+end
+wire(close.Activated,shutdown)
 local minimized=false
 wire(minimize.Activated,function()
     minimized=not minimized
@@ -690,7 +695,6 @@ showPage("COMBAT")
 rebuildTargets()
 local tickAt=0
 local updateAt=0
-local renderName="AETHER_AIM_"..tostring(LP.UserId)
 -- A single lightweight render connection; ESP and target discovery are throttled.
 RunService:BindToRenderStep(renderName,Enum.RenderPriority.Camera.Value+1,function(dt)
     if not state.alive then return end
@@ -709,21 +713,5 @@ RunService:BindToRenderStep(renderName,Enum.RenderPriority.Camera.Value+1,functi
     end
     renderAim(dt)
 end)
-local oldCleanup=G.AETHER_TINY_SKIES_CLOSE
-G.AETHER_TINY_SKIES_CLOSE=function()
-    if oldCleanup and oldCleanup~=G.AETHER_TINY_SKIES_CLOSE then
-        -- Prevent stale global from lingering when reexecuted.
-        oldCleanup=nil
-    end
-    if not state.alive then return end
-    state.alive=false
-    config.silent=false
-    config.aimLock=false
-    for _,c in ipairs(state.connections)do pcall(function()c:Disconnect()end)end
-    cleanupCache()
-    pcall(function()RunService:UnbindFromRenderStep(renderName)end)
-    pcall(function()gui:Destroy()end)
-    pcall(function()over:Destroy()end)
-    G.AETHER_TINY_SKIES_CLOSE=nil
-end
+G.AETHER_TINY_SKIES_CLOSE=shutdown
 print("[AETHER] Tiny Skies v1 loaded: enemy ESP ON; aim and silent test OFF.")
